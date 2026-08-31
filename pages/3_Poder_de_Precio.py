@@ -190,6 +190,11 @@ st.write(
     "**ponderado por unidades** de todo el mercado excluyendo a Repaglas: ese es el único benchmark que importa, "
     "no el precio de cualquier importador aislado."
 )
+st.caption(
+    "Periodo de esta sección: **unidades y FOB/unidad de ADEX, histórico completo 2022-jul.2026** (para "
+    "Repaglas y para todos los rivales, mismo rango) — distinto de la venta/cantidad/margen Bsale Ene-Jul 2026 "
+    "que se usa en el resto de la hoja (Secciones A, D y E)."
+)
 st.markdown(
     f"<div class='callout'>🔵 <b>Repaglas</b> · 🟠 <b>Rival material</b> (trajo ≥{MATERIALIDAD_UMBRAL*100:.0f}% "
     "de las unidades de Repaglas para ese código — sí cuenta como competencia real) · "
@@ -206,12 +211,14 @@ seleccion_b = st.multiselect(
 for r in [x for x in ROWS if x["sku"] in seleccion_b]:
     st.markdown(f"**{r['sku']}** ({r['oem']}) — {r['producto']}")
     fig2 = go.Figure()
-    # Repaglas
+    # Repaglas — mismo periodo que los rivales (ADEX 2022-jul.2026 completo), no Bsale Ene-Jul 2026
+    rep_imp = next(i for i in r["importadores"] if i["es_repaglas"])
+    rep_u, rep_fob_u = rep_imp["unidades"], rep_imp["fob_total"] / rep_imp["unidades"]
     fig2.add_trace(go.Scatter(
-        x=[r["cant26"]], y=[r["precio_fob_rep_usd"]], mode="markers",
+        x=[rep_u], y=[rep_fob_u], mode="markers",
         marker=dict(size=24, color=REP, opacity=0.95, line=dict(width=2, color="white")),
         name="Repaglas",
-        hovertemplate=f"<b>Repaglas</b><br>Unidades: {r['cant26']}<br>FOB/u: ${r['precio_fob_rep_usd']:.2f}<extra></extra>",
+        hovertemplate=f"<b>Repaglas</b><br>Unidades (2022-jul.26): {rep_u}<br>FOB/u: ${rep_fob_u:.2f}<extra></extra>",
     ))
     for i in r["rivales"]:
         color = DIN if i["material"] else NO_MATERIAL
@@ -231,7 +238,7 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
         )
     fig2.update_layout(
         height=320, margin=dict(l=10, r=10, t=20, b=10),
-        xaxis_title="Unidades importadas (escala log)", yaxis_title="FOB / unidad (US$)",
+        xaxis_title="Unidades importadas 2022-jul.2026, ADEX (escala log)", yaxis_title="FOB / unidad (US$)",
         xaxis_type="log", plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     )
     st.plotly_chart(fig2, use_container_width=True, key=f"scatter_{r['oem']}")
