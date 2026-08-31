@@ -6,13 +6,14 @@ Maxiforce de mayor venta de Repaglas, 2022–jul.2026. Ranking de venta desde
 Bsale (Dashboard_Ventas_20260818, ene–jul 2026).
 """
 
+import sys
+from pathlib import Path
+
 import plotly.graph_objects as go
 import streamlit as st
 
-REP = "#2a78d6"
-DIN = "#eb6834"
-GOOD = "#0ca30c"
-BAD = "#c0392b"
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from utils.data import REP, DIN, GOOD, BAD, load_sku_ancla  # noqa: E402
 
 st.set_page_config(page_title="SKU Ancla · Maxiforce", page_icon="🔧", layout="wide")
 
@@ -29,26 +30,31 @@ st.markdown(
 )
 
 # ================= DATA =================
-# code, sku, descripcion, cant26, venta26, share_full_pct, n_importadores, precio_rep_2526, [(rival, precio, unidades), ...]
+# El dataset base (share, venta, margen, etc.) vive en utils/data.py — se comparte con
+# la hoja "Poder de Precio" para no duplicar la investigación manual en ADEX.
+sku_ancla = load_sku_ancla()
+
+# Detalle de precio de compra (FOB/unidad) por rival, solo 2025-2026 — específico de esta
+# hoja, no se necesita en el resto del dashboard.
+PRICE_RIVALS = {
+    "RE65966": [],
+    "R116383": [],
+    "RE536083": [("Dinámica", 60.77, 10), ("JPK Mundo Parts", 65.55, 8)],
+    "RE500734": [("Dinámica", 55.00, 30), ("Fortrac", 75.52, 21), ("Amazon Motors", 172.24, 4)],
+    "RE66820": [("Fortrac", 14.69, 42), ("JPK Mundo Parts", 13.11, 8), ("AG Import Parve", 5.00, 8)],
+    "RE507850": [("Fortrac", 78.71, 36), ("Mateel", 39.55, 12)],
+    "RE501455": [("Dinámica", 51.66, 20), ("Fortrac", 91.58, 7), ("JPK Mundo Parts", 53.36, 8)],
+    "RE504914": [("Maquinarias y Repuestos", 544.70, 4), ("Corporación Pesquera Inca", 603.92, 3), ("Fortrac", 81.66, 11)],
+    "RE507920": [("Fortrac", 144.56, 44), ("JPK Mundo Parts", 57.54, 16), ("Dinámica", 55.71, 13)],
+    "RE48786": [("Maquinarias y Repuestos", 146.44, 33), ("IM Selva", 107.98, 24), ("Tractor Import", 89.66, 13)],
+}
+
+# Tuplas (code, sku, desc, cant26, venta26, share, n_imp, precio, rivals) para no tocar
+# el resto del archivo, que ya estaba escrito contra esta forma.
 skus = [
-    ("RE65966", "TRE65966", "Kit camisa/pistón/anillos/pin/jebes/seguros", 96, 48332, 99.9, 2, 74.41, []),
-    ("R116383", "TR116383", "Camisa de motor", 188, 33035, 94.2, 6, 27.39, []),
-    ("RE536083", "TRE536083", "Kit camisa/pistón/anillos/pin/jebes/seguros", 66, 37355, 90.3, 4, 86.62,
-     [("Dinámica", 60.77, 10), ("JPK Mundo Parts", 65.55, 8)]),
-    ("RE500734", "TRE500734", "Bomba de agua motor", 119, 64640, 89.1, 14, 77.62,
-     [("Dinámica", 55.00, 30), ("Fortrac", 75.52, 21), ("Amazon Motors", 172.24, 4)]),
-    ("RE66820", "TRE66820", "Jgo. anillos de motor", 632, 49781, 88.7, 11, 12.72,
-     [("Fortrac", 14.69, 42), ("JPK Mundo Parts", 13.11, 8), ("AG Import Parve", 5.00, 8)]),
-    ("RE507850", "TRE507850", "Kit camisa/pistón/anillos/pin/jebes/seguros", 189, 93542, 88.6, 7, 73.59,
-     [("Fortrac", 78.71, 36), ("Mateel", 39.55, 12)]),
-    ("RE501455", "TRE501455", "Jgo. empaquetaduras de motor", 112, 59955, 85.7, 12, 80.99,
-     [("Dinámica", 51.66, 20), ("Fortrac", 91.58, 7), ("JPK Mundo Parts", 53.36, 8)]),
-    ("RE504914", "TRE504914", "Bomba de aceite motor", 132, 70817, 75.7, 19, 86.12,
-     [("Maquinarias y Repuestos", 544.70, 4), ("Corporación Pesquera Inca", 603.92, 3), ("Fortrac", 81.66, 11)]),
-    ("RE507920", "TRE507920", "Kit camisa/pistón/anillos/pin/jebes/seguros", 227, 106243, 74.3, 14, 75.98,
-     [("Fortrac", 144.56, 44), ("JPK Mundo Parts", 57.54, 16), ("Dinámica", 55.71, 13)]),
-    ("RE48786", "TRE48786", "Inyector de motor", 322, 67964, 43.9, 24, 33.91,
-     [("Maquinarias y Repuestos", 146.44, 33), ("IM Selva", 107.98, 24), ("Tractor Import", 89.66, 13)]),
+    (r["oem"], r["sku"], r["producto"], r["cant26"], r["venta26"], r["share_full_pct"],
+     r["n_importadores"], r["precio_fob_rep_usd"], PRICE_RIVALS[r["oem"]])
+    for r in sku_ancla
 ]
 
 
