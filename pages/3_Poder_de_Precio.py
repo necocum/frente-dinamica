@@ -158,8 +158,8 @@ for r in ROWS:
         go.Scatter(
             x=[r["share_full_pct"]], y=[r["margen26_pct"]],
             mode="markers+text", text=[r["sku"]], textposition="top center",
-            marker=dict(size=max(18, r["venta26"] / 1500), color=TIER_COLOR[r["tier"]], opacity=0.85,
-                        line=dict(width=1, color="white")),
+            marker=dict(size=max(22, r["venta26"] / 1300), color=TIER_COLOR[r["tier"]], opacity=0.95,
+                        line=dict(width=2, color="white")),
             showlegend=False,
             hovertemplate=(
                 f"<b>{r['sku']}</b> (OEM {r['oem']})<br>{r['producto']}<br>"
@@ -200,16 +200,19 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
     fig2 = go.Figure()
     # Repaglas
     fig2.add_trace(go.Scatter(
-        x=[r["cant26"]], y=[r["precio_fob_rep_usd"]], mode="markers", marker=dict(size=22, color=REP),
+        x=[r["cant26"]], y=[r["precio_fob_rep_usd"]], mode="markers",
+        marker=dict(size=24, color=REP, opacity=0.95, line=dict(width=2, color="white")),
         name="Repaglas",
         hovertemplate=f"<b>Repaglas</b><br>Unidades: {r['cant26']}<br>FOB/u: ${r['precio_fob_rep_usd']:.2f}<extra></extra>",
     ))
     for i in r["rivales"]:
-        color = DIN if i["material"] else "#b8ae9a"
+        color = DIN if i["material"] else "#9a9088"
         label = i["nombre"] if i["material"] else f"{i['nombre']} (no material)"
         fig2.add_trace(go.Scatter(
             x=[i["unidades"]], y=[i["fob_u"]], mode="markers",
-            marker=dict(size=max(8, min(30, i["fob_total"] / 300)), color=color, opacity=0.85 if i["material"] else 0.45),
+            marker=dict(size=max(10, min(32, i["fob_total"] / 300)), color=color,
+                        opacity=0.95 if i["material"] else 0.55,
+                        line=dict(width=1.5, color="white")),
             name=label, showlegend=False,
             hovertemplate=f"<b>{label}</b><br>Unidades: {i['unidades']}<br>FOB total: ${i['fob_total']:,.0f}<br>FOB/u: ${i['fob_u']:.2f}<extra></extra>",
         ))

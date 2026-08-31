@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from utils.data import REP, DIN, GOOD, BAD, load_sku_ancla  # noqa: E402
+from utils.data import REP, DIN, GOOD, AMBER, BAD, load_sku_ancla  # noqa: E402
 
 st.set_page_config(page_title="SKU Ancla · Maxiforce", page_icon="🔧", layout="wide")
 
@@ -119,7 +119,7 @@ st.subheader("Share de mercado por código")
 for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
     c1, c2 = st.columns([1, 4])
     c1.markdown(f"**{sku}**<br><span style='font-size:12px;color:#948a76;'>{desc}</span>", unsafe_allow_html=True)
-    color = BAD if share < 60 else (REP if share >= 85 else "#c98a2e")
+    color = BAD if share < 60 else (REP if share >= 85 else AMBER)
     c2.markdown(share_bar(share, color), unsafe_allow_html=True)
 
 st.markdown(

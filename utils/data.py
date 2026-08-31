@@ -11,11 +11,11 @@ Los campos de venta/cantidad/margen vienen de Bsale
 
 import streamlit as st
 
-REP = "#2a78d6"
-DIN = "#eb6834"
-GOOD = "#0ca30c"
-AMBER = "#c98a2e"
-BAD = "#c0392b"
+REP = "#1f6feb"
+DIN = "#ff7a1a"
+GOOD = "#14c766"
+AMBER = "#f5a623"
+BAD = "#ff4d4f"
 
 # code, sku, producto, cant26, venta26 (S/, Ene-Jul), margen26_pct, share_full_pct,
 # n_importadores, precio_fob_rep_usd (2025-26), rival_nombre, rival_share_pct (full periodo)
