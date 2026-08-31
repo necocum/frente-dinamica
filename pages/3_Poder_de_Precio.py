@@ -30,7 +30,7 @@ import streamlit as st
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from utils.data import (  # noqa: E402
-    REP, DIN, GOOD, AMBER, BAD, MATERIALIDAD_UMBRAL,
+    REP, DIN, GOOD, AMBER, BAD, NO_MATERIAL, MATERIALIDAD_UMBRAL,
     load_sku_ancla, load_importadores_por_oem, load_alternativas_marca,
 )
 
@@ -190,6 +190,14 @@ st.write(
     "**ponderado por unidades** de todo el mercado excluyendo a Repaglas: ese es el único benchmark que importa, "
     "no el precio de cualquier importador aislado."
 )
+st.markdown(
+    f"<div class='callout'>🔵 <b>Repaglas</b> · 🟠 <b>Rival material</b> (trajo ≥{MATERIALIDAD_UMBRAL*100:.0f}% "
+    "de las unidades de Repaglas para ese código — sí cuenta como competencia real) · "
+    "⚪ <b>Rival no material</b> (lote chico, por debajo del umbral — se ve gris a propósito, para que no "
+    "distraiga de la comparación de precio). Si un SKU no tiene ningún punto naranja, quiere decir que "
+    "<b>nadie más trajo un volumen comparable al de Repaglas</b> en ese código.</div>",
+    unsafe_allow_html=True,
+)
 seleccion_b = st.multiselect(
     "SKU a inspeccionar", options=[r["sku"] for r in ROWS], default=[r["sku"] for r in ROWS],
     format_func=lambda s: f"{s} ({[r['oem'] for r in ROWS if r['sku']==s][0]})", key="sel_b",
@@ -206,13 +214,13 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
         hovertemplate=f"<b>Repaglas</b><br>Unidades: {r['cant26']}<br>FOB/u: ${r['precio_fob_rep_usd']:.2f}<extra></extra>",
     ))
     for i in r["rivales"]:
-        color = DIN if i["material"] else "#9a9088"
+        color = DIN if i["material"] else NO_MATERIAL
         label = i["nombre"] if i["material"] else f"{i['nombre']} (no material)"
         fig2.add_trace(go.Scatter(
             x=[i["unidades"]], y=[i["fob_u"]], mode="markers",
-            marker=dict(size=max(10, min(32, i["fob_total"] / 300)), color=color,
-                        opacity=0.95 if i["material"] else 0.55,
-                        line=dict(width=1.5, color="white")),
+            marker=dict(size=max(9, min(28, i["fob_total"] / 350)) if i["material"] else 9,
+                        color=color, opacity=1.0 if i["material"] else 0.9,
+                        line=dict(width=1.5 if i["material"] else 1, color="white" if i["material"] else "#c9c0ae")),
             name=label, showlegend=False,
             hovertemplate=f"<b>{label}</b><br>Unidades: {i['unidades']}<br>FOB total: ${i['fob_total']:,.0f}<br>FOB/u: ${i['fob_u']:.2f}<extra></extra>",
         ))
@@ -240,6 +248,14 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
             "¿Material?": ["—" if i["es_repaglas"] else ("Sí" if i.get("material") else "No") for i in tabla_imp],
         },
         use_container_width=True, hide_index=True, key=f"tabla_{r['oem']}",
+        column_config={
+            "¿Material?": st.column_config.TextColumn(
+                "¿Material?",
+                help=f"Sí = trajo al menos {MATERIALIDAD_UMBRAL*100:.0f}% de las unidades de Repaglas para este "
+                     "código, así que su precio sí cuenta como referencia de mercado. No = lote chico que no "
+                     "debería influir en la comparación de precio.",
+            ),
+        },
     )
     st.divider()
 

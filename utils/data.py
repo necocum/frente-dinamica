@@ -13,9 +13,10 @@ import streamlit as st
 
 REP = "#1f6feb"
 DIN = "#ff7a1a"
-GOOD = "#14c766"
-AMBER = "#f5a623"
-BAD = "#ff4d4f"
+GOOD = "#00c853"
+AMBER = "#ffab00"
+BAD = "#ff1744"
+NO_MATERIAL = "#e4ddd0"  # gris casi invisible a propósito: lotes chicos que no deben distraer
 
 # code, sku, producto, cant26, venta26 (S/, Ene-Jul), margen26_pct, share_full_pct,
 # n_importadores, precio_fob_rep_usd (2025-26), rival_nombre, rival_share_pct (full periodo)
