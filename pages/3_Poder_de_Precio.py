@@ -151,6 +151,11 @@ st.divider()
 # ================= A) MATRIZ =================
 st.subheader("A) Matriz de poder de precio")
 st.write("Cada burbuja es un SKU. Tamaño = venta Ene-Jul 2026. Líneas de referencia en share 60% y 85%.")
+st.caption(
+    "Eje X: share de importación ADEX, **histórico completo 2022-jul.2026**. Eje Y y tamaño de burbuja: "
+    "margen % y venta, **Bsale Ene-Jul 2026**. Son dos periodos distintos a propósito — el eje X mide "
+    "liderazgo estructural (varios años), el eje Y el estado comercial actual (último corte disponible)."
+)
 
 fig = go.Figure()
 for r in ROWS:
@@ -163,9 +168,10 @@ for r in ROWS:
             showlegend=False,
             hovertemplate=(
                 f"<b>{r['sku']}</b> (OEM {r['oem']})<br>{r['producto']}<br>"
-                f"Venta Ene-Jul 26: S/{r['venta26']:,.0f}<br>Unidades: {r['cant26']}<br>"
-                f"Margen: {r['margen26_pct']:.1f}%<br>Share ADEX: {r['share_full_pct']:.1f}%<br>"
-                f"N° importadores: {r['n_importadores']}"
+                f"Venta Ene-Jul 2026: S/{r['venta26']:,.0f}<br>Unidades vendidas Ene-Jul 2026: {r['cant26']}<br>"
+                f"Margen Ene-Jul 2026: {r['margen26_pct']:.1f}%<br>"
+                f"Share importación ADEX 2022-jul.2026: {r['share_full_pct']:.1f}%<br>"
+                f"N° importadores (2022-jul.2026): {r['n_importadores']}"
                 "<extra></extra>"
             ),
         )
@@ -174,7 +180,7 @@ fig.add_vline(x=60, line_dash="dot", line_color="#948a76", annotation_text="60%"
 fig.add_vline(x=85, line_dash="dash", line_color="#948a76", annotation_text="85%")
 fig.update_layout(
     height=440, margin=dict(l=10, r=10, t=30, b=10),
-    xaxis_title="Share de importación ADEX (%)", yaxis_title="Margen actual (%)",
+    xaxis_title="Share de importación ADEX 2022-jul.2026 (%)", yaxis_title="Margen Bsale Ene-Jul 2026 (%)",
     xaxis=dict(range=[0, 105]), yaxis=dict(range=[30, 48]),
     plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
 )
@@ -248,8 +254,8 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
     st.dataframe(
         {
             "Importador": [("Repaglas" if i["es_repaglas"] else i["nombre"]) for i in tabla_imp],
-            "Unidades": [i["unidades"] for i in tabla_imp],
-            "FOB total": [f"${i['fob_total']:,.0f}" for i in tabla_imp],
+            "Unidades (ADEX 2022-jul.26)": [i["unidades"] for i in tabla_imp],
+            "FOB total (2022-jul.26)": [f"${i['fob_total']:,.0f}" for i in tabla_imp],
             "FOB/unidad": [f"${(i['fob_total']/i['unidades']) if i['unidades'] else 0:.2f}" for i in tabla_imp],
             "% de unidades del mercado": [f"{i['unidades']/total_u*100:.1f}%" for i in tabla_imp],
             "¿Material?": ["—" if i["es_repaglas"] else ("Sí" if i.get("material") else "No") for i in tabla_imp],
@@ -272,12 +278,13 @@ st.write(
     "Antes de salir a buscar un proveedor nuevo: ¿alguna otra marca del catálogo Bsale (KMP, Sheng Bao, Yedpar, "
     "Ozgur, FDR, OPEX John Deere, Vapormatic, Bepco, TVH) ya cubre este mismo código OEM?"
 )
+st.caption("Todos los precios y montos de venta de esta tabla son **Bsale, Ene-Jul 2026** (mismo corte que el resto del catálogo).")
 alt_rows = []
 for r in ROWS:
     if r["alternativas"]:
         resumen = "; ".join(
-            f"{a['marca']} S/{a['precio_venta']:.2f} ({a['cant26']} und, S/{a['venta26']:,.0f})"
-            if a["cant26"] > 0 else f"{a['marca']} S/{a['precio_venta']:.2f} (sin venta)"
+            f"{a['marca']} S/{a['precio_venta']:.2f} ({a['cant26']} und, S/{a['venta26']:,.0f}, Ene-Jul 26)"
+            if a["cant26"] > 0 else f"{a['marca']} S/{a['precio_venta']:.2f} (sin venta Ene-Jul 26)"
             for a in r["alternativas"]
         )
     else:
@@ -288,8 +295,8 @@ st.dataframe(
     {
         "OEM": [r["oem"] for r, _ in alt_rows],
         "SKU Maxiforce": [r["sku"] for r, _ in alt_rows],
-        "Precio venta Maxiforce": [f"S/{r['precio_venta_u']:,.2f}" for r, _ in alt_rows],
-        "Marcas alternativas encontradas": [s for _, s in alt_rows],
+        "Precio venta Maxiforce (Ene-Jul 26)": [f"S/{r['precio_venta_u']:,.2f}" for r, _ in alt_rows],
+        "Marcas alternativas encontradas (Ene-Jul 26)": [s for _, s in alt_rows],
         "Estado": [r["estado_alt"] for r, _ in alt_rows],
     },
     use_container_width=True, hide_index=True,
@@ -306,6 +313,10 @@ st.divider()
 
 # ================= D) SIMULADOR =================
 st.subheader("D) Simulador de subida de precio")
+st.caption(
+    "Base de cálculo: unidades, precio de venta y margen **Bsale Ene-Jul 2026** (misma base que la Sección A "
+    "y la tabla E). El share ADEX usado para el default de selección es 2022-jul.2026."
+)
 default_skus = [r["sku"] for r in ROWS if r["share_full_pct"] >= 85]
 seleccion_d = st.multiselect(
     "SKU a simular", options=[r["sku"] for r in ROWS], default=default_skus,
@@ -379,26 +390,31 @@ for r in ROWS:
     rows_e.append({**r, "movimiento": movimiento_recomendado(r), "margen_incr": margen_incr})
 
 rows_e.sort(key=lambda r: -r["margen_incr"])
+st.caption(
+    "\"Venta\", \"Unidades\" y \"Margen %\" son Bsale Ene-Jul 2026. \"Share ADEX\", \"N° importadores\", "
+    "\"Competidores materiales\" y \"Precio ponderado mercado\" son ADEX histórico completo 2022-jul.2026. "
+    "\"Margen incremental\" es una proyección anualizada (×12/7) a partir de Ene-Jul 2026 — ver Sección D."
+)
 st.dataframe(
     {
         "SKU": [r["sku"] for r in rows_e],
         "OEM": [r["oem"] for r in rows_e],
         "Producto": [r["producto"] for r in rows_e],
         "Venta Ene-Jul 26 (S/)": [f"{r['venta26']:,.0f}" for r in rows_e],
-        "Unidades": [r["cant26"] for r in rows_e],
-        "Margen %": [f"{r['margen26_pct']:.1f}%" for r in rows_e],
-        "Share ADEX": [f"{r['share_full_pct']:.1f}%" for r in rows_e],
-        "N° importadores": [r["n_importadores"] for r in rows_e],
-        "Competidores materiales": [
+        "Unidades vendidas (Ene-Jul 26)": [r["cant26"] for r in rows_e],
+        "Margen % (Ene-Jul 26)": [f"{r['margen26_pct']:.1f}%" for r in rows_e],
+        "Share ADEX (2022-jul.26)": [f"{r['share_full_pct']:.1f}%" for r in rows_e],
+        "N° importadores (2022-jul.26)": [r["n_importadores"] for r in rows_e],
+        "Competidores materiales (2022-jul.26)": [
             ", ".join(f"{i['nombre']} ({i['unidades']}u)" for i in r["materiales"]) or "Ninguno"
             for r in rows_e
         ],
-        "Precio ponderado mercado (US$/u)": [
+        "Precio ponderado mercado (US$/u, 2022-jul.26)": [
             f"${r['precio_ponderado_mercado']:.2f}" if r["precio_ponderado_mercado"] else "—" for r in rows_e
         ],
-        "Alternativa de marca": [r["estado_alt"] for r in rows_e],
+        "Alternativa de marca (Ene-Jul 26)": [r["estado_alt"] for r in rows_e],
         "Movimiento recomendado": [r["movimiento"] for r in rows_e],
-        "Margen incremental S/ (anual)": [f"{r['margen_incr']:,.0f}" for r in rows_e],
+        "Margen incremental S/ (anualizado)": [f"{r['margen_incr']:,.0f}" for r in rows_e],
     },
     use_container_width=True, hide_index=True,
 )
@@ -411,9 +427,10 @@ try:
     ws = wb.active
     ws.title = "Poder de Precio"
     ws.append([
-        "SKU", "OEM", "Producto", "Venta Ene-Jul 26 (S/)", "Unidades", "Margen %", "Share ADEX %",
-        "N° importadores", "Competidores materiales", "Precio ponderado mercado (US$/u)",
-        "Alternativa de marca", "Movimiento recomendado", "Margen incremental S/ (anual)",
+        "SKU", "OEM", "Producto", "Venta Ene-Jul 26 (S/)", "Unidades vendidas (Ene-Jul 26)",
+        "Margen % (Ene-Jul 26)", "Share ADEX % (2022-jul.26)", "N° importadores (2022-jul.26)",
+        "Competidores materiales (2022-jul.26)", "Precio ponderado mercado US$/u (2022-jul.26)",
+        "Alternativa de marca (Ene-Jul 26)", "Movimiento recomendado", "Margen incremental S/ (anualizado)",
     ])
     for r in rows_e:
         ws.append([
