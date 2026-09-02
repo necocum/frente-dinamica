@@ -129,11 +129,9 @@ st.divider()
 # ================= DETALLE POR SKU =================
 st.subheader("Detalle por SKU y año — en qué códigos compite cada rival, y a qué precio")
 st.write(
-    "Mismos 4 rivales recurrentes, pero el precio ahora se compara **año contra año** — el precio "
-    "del rival en 2024 se compara con el precio de Repaglas en 2024, no con un promedio "
-    "2022-jul.2026 mezclado. Un promedio multi-año puede esconder que el precio de un rival "
-    "cambió mucho entre 2022 y hoy, o comparar un año viejo de Repaglas con un año reciente del "
-    "rival (o viceversa)."
+    "Mismos 4 rivales recurrentes, comparados **año contra año** — el precio del rival en 2024 se "
+    "compara con el precio de Repaglas en 2024, no con un promedio 2022-jul.2026 mezclado. "
+    "Ordenado del **año más reciente al más viejo**, así lo primero que se ve es lo más vigente."
 )
 st.caption(
     "\"Sin comparación\" = Repaglas no importó ese código ese mismo año en el reporte ADEX "
@@ -144,23 +142,33 @@ seleccion_riv = st.multiselect(
     "Rival a inspeccionar", options=[r["nombre"] for r in rivales_recurrentes],
     default=[r["nombre"] for r in rivales_recurrentes],
 )
+
+
+def comparacion_str(pct):
+    if pct is None:
+        return "— Sin comparación"
+    if pct < 90:
+        return f"🟢 {100 - pct:.0f}% más barato"
+    if pct > 110:
+        return f"🔴 {pct - 100:.0f}% más caro"
+    return "⚪ Precio similar"
+
+
 for riv in rivales_recurrentes:
     if riv["nombre"] not in seleccion_riv:
         continue
     filas = sorted(
         [d for d in detalle_anual if d["rival"] == riv["nombre"]],
-        key=lambda d: (d["oem"], d["anio"]),
+        key=lambda d: (-d["anio"], d["oem"]),
     )
     st.markdown(f"**{riv['nombre']}** — {riv['total']} unidades Maxiforce en {len(riv['detalle_sku'])} SKU")
     st.dataframe(
         {
-            "OEM": [f["oem"] for f in filas],
-            "Año": [f["anio"] for f in filas],
-            "Unidades (rival)": [f["riv_u"] for f in filas],
-            "FOB/unidad (rival)": [f"${f['riv_fob_u']:.2f}" for f in filas],
-            "Unidades (Repaglas, mismo año)": [f["rep_u"] or "—" for f in filas],
-            "FOB/unidad (Repaglas, mismo año)": [f"${f['rep_fob_u']:.2f}" if f["rep_fob_u"] else "—" for f in filas],
-            "% del precio de Repaglas": [f"{f['pct']:.0f}%" if f["pct"] else "Sin comparación" for f in filas],
+            "SKU · Año": [f"{f['oem']} · {f['anio']}" for f in filas],
+            "Unidades (rival / Repaglas)": [f"{f['riv_u']} / {f['rep_u'] or '—'}" for f in filas],
+            "FOB/u rival": [f"${f['riv_fob_u']:.2f}" for f in filas],
+            "FOB/u Repaglas": [f"${f['rep_fob_u']:.2f}" if f["rep_fob_u"] else "—" for f in filas],
+            "Comparación": [comparacion_str(f["pct"]) for f in filas],
         },
         use_container_width=True, hide_index=True, key=f"detalle_{riv['nombre']}",
     )
