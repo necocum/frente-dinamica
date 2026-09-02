@@ -14,7 +14,7 @@ import streamlit as st
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from utils.data import (  # noqa: E402
-    REP, DIN, GOOD, AMBER, BAD, load_sku_ancla, load_alternativas_marca, load_tendencia_anual,
+    REP, DIN, GOOD, AMBER, BAD, load_sku_ancla, load_alternativas_marca, load_tendencia_por_importador,
 )
 
 st.set_page_config(page_title="SKU Ancla · Maxiforce", page_icon="🔧", layout="wide")
@@ -61,7 +61,7 @@ skus = [
 ]
 
 alternativas = load_alternativas_marca()
-tendencia = load_tendencia_anual()
+tendencia = load_tendencia_por_importador()
 
 
 def sustitutos_str(oem):
@@ -156,43 +156,53 @@ st.markdown(
 
 st.divider()
 
-# ================= TENDENCIA ANUAL =================
-st.subheader("Tendencia de importación por año")
+# ================= TENDENCIA ANUAL POR IMPORTADOR =================
+st.subheader("Tendencia de importación por año, por importador")
 st.write(
-    "Unidades importadas por todo el mercado peruano en cada código, año a año — Repaglas frente al resto de "
-    "importadores. **2026 es parcial** (solo hasta julio, igual que el resto del dashboard), así que su barra es "
-    "más baja por diseño, no por caída real de demanda."
+    "Unidades importadas por año en cada código — Repaglas frente a sus **2 rivales más cercanos por volumen "
+    "histórico** en ese SKU (no un agregado de \"resto del mercado\"). Cada rival lleva su share de FOB "
+    "2022-jul.2026 entre paréntesis. **2026 es parcial** (solo hasta julio), así que su barra es más baja por "
+    "diseño, no por caída real de demanda. Cuando un rival no importó nada un año, simplemente no tiene barra "
+    "ese año — no significa cero ventas, solo cero importación directa registrada."
 )
 seleccion_t = st.multiselect(
     "SKU a inspeccionar", options=[s[1] for s in skus], default=[s[1] for s in skus], key="sel_tendencia",
     format_func=lambda s: f"{s} ({[x[0] for x in skus if x[1]==s][0]})",
 )
-anios = [2022, 2023, 2024, 2025, "2026*"]
-primero = True
+anios_num = [2022, 2023, 2024, 2025, 2026]
+anios_label = ["2022", "2023", "2024", "2025", "2026*"]
+RIVAL_COLORS = ["#c0392b", "#8a7f6a"]
 for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
     if sku not in seleccion_t:
         continue
     st.markdown(f"**{sku}** ({code}) — {desc}")
-    serie = tendencia.get(code, {})
-    rep_vals = [serie.get(a, {}).get("repaglas", 0) for a in [2022, 2023, 2024, 2025, 2026]]
-    resto_vals = [serie.get(a, {}).get("resto", 0) for a in [2022, 2023, 2024, 2025, 2026]]
+    serie = tendencia.get(code, {"repaglas": {}, "rivales": []})
+    rep_vals = [serie["repaglas"].get(a, 0) for a in anios_num]
     fig3 = go.Figure()
-    fig3.add_bar(x=anios, y=rep_vals, name="Repaglas", marker_color=REP)
-    fig3.add_bar(x=anios, y=resto_vals, name="Resto del mercado", marker_color="#b0a690")
+    fig3.add_bar(x=anios_label, y=rep_vals, name="Repaglas", marker_color=REP)
+    for i, riv in enumerate(serie["rivales"]):
+        riv_vals = [riv["por_anio"].get(a, 0) for a in anios_num]
+        color = DIN if riv["nombre"] == "Dinámica" else RIVAL_COLORS[i % len(RIVAL_COLORS)]
+        fig3.add_bar(
+            x=anios_label, y=riv_vals, name=f"{riv['nombre']} ({riv['share_pct']:.1f}% share)",
+            marker_color=color,
+        )
+    if not serie["rivales"]:
+        st.caption("Sin rivales con volumen registrado en ADEX para este código — Repaglas es el único importador.")
     fig3.update_layout(
-        barmode="group", height=260, margin=dict(l=10, r=10, t=10, b=10), showlegend=primero,
+        barmode="group", height=280, margin=dict(l=10, r=10, t=10, b=10), showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
         yaxis_title="Unidades", plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     )
     st.plotly_chart(fig3, use_container_width=True, key=f"tendencia_{code}")
-    primero = False
 
 st.markdown(
     "<div class='callout'><b>Lectura:</b> el volumen de Repaglas crece de forma sostenida en la mayoría de "
     "códigos hasta 2025 (ej. RE507920: 330→473 unidades/año 2022-2025), con 2026 en camino a un año similar o "
-    "mayor una vez anualizado el dato parcial. El resto del mercado, en cambio, no muestra una tendencia de "
-    "crecimiento consistente en ningún código — se mueve en lotes puntuales año a año, sin la cadencia estable "
-    "de Repaglas. Eso es justamente lo que sostiene el share: no es solo mayor volumen, es volumen más "
-    "predecible.</div>",
+    "mayor una vez anualizado el dato parcial. Sus rivales más cercanos, en cambio, casi nunca importan todos "
+    "los años — <b>IPESA</b> (el rival recurrente en 7 de los 10 SKU) entra y sale del mercado en lotes "
+    "puntuales, sin la cadencia estable de Repaglas. Eso es justamente lo que sostiene el share: no es solo "
+    "mayor volumen, es volumen más predecible.</div>",
     unsafe_allow_html=True,
 )
 

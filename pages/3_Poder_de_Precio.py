@@ -68,11 +68,14 @@ def build_rows():
         rivales = [i for i in imp if not i["es_repaglas"]]
         for i in rivales:
             i["fob_u"] = i["fob_total"] / i["unidades"] if i["unidades"] else 0
+            i["cif_u"] = i["cif_total"] / i["unidades"] if i["unidades"] else 0
             i["material"] = i["unidades"] >= MATERIALIDAD_UMBRAL * repaglas_u
         materiales = [i for i in rivales if i["material"]]
         fob_rivales = sum(i["fob_total"] for i in rivales)
+        cif_rivales = sum(i["cif_total"] for i in rivales)
         u_rivales = sum(i["unidades"] for i in rivales)
         precio_ponderado_mercado = fob_rivales / u_rivales if u_rivales else None
+        precio_ponderado_mercado_cif = cif_rivales / u_rivales if u_rivales else None
 
         alts = alternativas[oem]
         alts_vendiendo = [a for a in alts if a["cant26"] > 0]
@@ -100,6 +103,7 @@ def build_rows():
                 "rivales": rivales,
                 "materiales": materiales,
                 "precio_ponderado_mercado": precio_ponderado_mercado,
+                "precio_ponderado_mercado_cif": precio_ponderado_mercado_cif,
                 "alternativas": alts,
                 "alt_vendiendo": alts_vendiendo,
                 "estado_alt": estado_alt,
@@ -132,10 +136,11 @@ st.markdown(
 )
 
 st.markdown(
-    "<div class='callout-warn'><b>⚠️ FOB no es costo puesto en almacén.</b> Repaglas trae 89% de su carga desde "
-    "EE.UU.; Dinámica diversifica a Brasil, Turquía, India y China — con flete, arancel y lead time distintos "
-    "para cada origen. Un FOB más bajo desde otro país no significa costo final más bajo puesto en Perú. "
-    "Comparar FOB pelado exagera la brecha real. <b>Nada en esta hoja sugiere bajar precios.</b></div>"
+    "<div class='callout-warn'><b>⚠️ FOB no es costo puesto en almacén — ni CIF tampoco, del todo.</b> Repaglas "
+    "trae 89% de su carga desde EE.UU.; los rivales suelen traer de China, Turquía o India, con flete, arancel y "
+    "lead time distintos para cada origen. La Sección B ahora deja elegir <b>CIF/unidad</b> (FOB + flete + "
+    "seguro) en vez de FOB pelado — corrige buena parte del sesgo de origen, pero todavía no incluye arancel, "
+    "agente de aduana ni almacenaje. <b>Nada en esta hoja sugiere bajar precios.</b></div>"
     "<div class='callout-warn'><b>⚠️ El precio de un competidor sobre un lote pequeño no es benchmark.</b> "
     "Puede ser un saldo puntual, o una variante de calidad distinta bajo la misma descripción comercial de ADEX. "
     "Por eso la Sección B separa a los importadores \"material\" (≥10% de las unidades de Repaglas) del resto.</div>",
@@ -209,6 +214,15 @@ st.markdown(
     "<b>nadie más trajo un volumen comparable al de Repaglas</b> en ese código.</div>",
     unsafe_allow_html=True,
 )
+metrica_b = st.radio(
+    "Métrica de precio para el gráfico y la línea de referencia",
+    ["CIF/unidad (recomendado)", "FOB/unidad"], horizontal=True, key="metrica_b",
+    help="CIF = FOB + flete + seguro puesto en Callao. Repaglas trae 89% de su carga desde EE.UU. y varios "
+         "rivales de China/Turquía/India: comparar FOB pelado infla la brecha de precio real, porque el flete "
+         "marítimo desde Asia suele pesar más como % del valor que uno aéreo/marítimo desde EE.UU. CIF no es el "
+         "costo final puesto en almacén (falta arancel, agente, almacenaje) pero corrige esa parte del sesgo.",
+)
+usar_cif = metrica_b.startswith("CIF")
 seleccion_b = st.multiselect(
     "SKU a inspeccionar", options=[r["sku"] for r in ROWS], default=[r["sku"] for r in ROWS],
     format_func=lambda s: f"{s} ({[r['oem'] for r in ROWS if r['sku']==s][0]})", key="sel_b",
@@ -219,32 +233,36 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
     fig2 = go.Figure()
     # Repaglas — mismo periodo que los rivales (ADEX 2022-jul.2026 completo), no Bsale Ene-Jul 2026
     rep_imp = next(i for i in r["importadores"] if i["es_repaglas"])
-    rep_u, rep_fob_u = rep_imp["unidades"], rep_imp["fob_total"] / rep_imp["unidades"]
+    rep_u = rep_imp["unidades"]
+    rep_precio = (rep_imp["cif_total"] if usar_cif else rep_imp["fob_total"]) / rep_u
+    metrica_label = "CIF" if usar_cif else "FOB"
     fig2.add_trace(go.Scatter(
-        x=[rep_u], y=[rep_fob_u], mode="markers",
+        x=[rep_u], y=[rep_precio], mode="markers",
         marker=dict(size=24, color=REP, opacity=0.95, line=dict(width=2, color="white")),
         name="Repaglas",
-        hovertemplate=f"<b>Repaglas</b><br>Unidades (2022-jul.26): {rep_u}<br>FOB/u: ${rep_fob_u:.2f}<extra></extra>",
+        hovertemplate=f"<b>Repaglas</b><br>Unidades (2022-jul.26): {rep_u}<br>{metrica_label}/u: ${rep_precio:.2f}<extra></extra>",
     ))
     for i in r["rivales"]:
         color = DIN if i["material"] else NO_MATERIAL
         label = i["nombre"] if i["material"] else f"{i['nombre']} (no material)"
+        precio_i = i["cif_u"] if usar_cif else i["fob_u"]
         fig2.add_trace(go.Scatter(
-            x=[i["unidades"]], y=[i["fob_u"]], mode="markers",
+            x=[i["unidades"]], y=[precio_i], mode="markers",
             marker=dict(size=max(9, min(28, i["fob_total"] / 350)) if i["material"] else 9,
                         color=color, opacity=1.0 if i["material"] else 0.9,
                         line=dict(width=1.5 if i["material"] else 1, color="white" if i["material"] else "#c9c0ae")),
             name=label, showlegend=False,
-            hovertemplate=f"<b>{label}</b><br>Unidades: {i['unidades']}<br>FOB total: ${i['fob_total']:,.0f}<br>FOB/u: ${i['fob_u']:.2f}<extra></extra>",
+            hovertemplate=f"<b>{label}</b><br>Unidades: {i['unidades']}<br>{metrica_label}/u: ${precio_i:.2f}<extra></extra>",
         ))
-    if r["precio_ponderado_mercado"] is not None:
+    precio_ref = r["precio_ponderado_mercado_cif"] if usar_cif else r["precio_ponderado_mercado"]
+    if precio_ref is not None:
         fig2.add_hline(
-            y=r["precio_ponderado_mercado"], line_dash="dash", line_color="#948a76",
-            annotation_text=f"promedio mercado (excl. Repaglas): ${r['precio_ponderado_mercado']:.2f}/u",
+            y=precio_ref, line_dash="dash", line_color="#948a76",
+            annotation_text=f"promedio mercado (excl. Repaglas): ${precio_ref:.2f}/u {metrica_label}",
         )
     fig2.update_layout(
         height=320, margin=dict(l=10, r=10, t=20, b=10),
-        xaxis_title="Unidades importadas 2022-jul.2026, ADEX (escala log)", yaxis_title="FOB / unidad (US$)",
+        xaxis_title="Unidades importadas 2022-jul.2026, ADEX (escala log)", yaxis_title=f"{metrica_label} / unidad (US$)",
         xaxis_type="log", plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     )
     st.plotly_chart(fig2, use_container_width=True, key=f"scatter_{r['oem']}")
@@ -262,12 +280,18 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
             "Unidades (ADEX 2022-jul.26)": [i["unidades"] for i in tabla_imp],
             "FOB total (2022-jul.26)": [f"${i['fob_total']:,.0f}" for i in tabla_imp],
             "FOB/unidad": [f"${(i['fob_total']/i['unidades']) if i['unidades'] else 0:.2f}" for i in tabla_imp],
+            "CIF/unidad": [f"${(i['cif_total']/i['unidades']) if i['unidades'] else 0:.2f}" for i in tabla_imp],
             "% de unidades del mercado": [f"{i['unidades']/total_u*100:.1f}%" for i in tabla_imp],
             "País de origen": [origen_str(i) for i in tabla_imp],
             "¿Material?": ["—" if i["es_repaglas"] else ("Sí" if i.get("material") else "No") for i in tabla_imp],
         },
         use_container_width=True, hide_index=True, key=f"tabla_{r['oem']}",
         column_config={
+            "CIF/unidad": st.column_config.TextColumn(
+                "CIF/unidad",
+                help="FOB + flete + seguro puesto en el puerto de Callao (antes de arancel, agente y "
+                     "almacenaje). Más comparable que el FOB entre importadores con orígenes distintos.",
+            ),
             "País de origen": st.column_config.TextColumn(
                 "País de origen",
                 help="País(es) de embarque de este importador para este SKU, con unidades entre paréntesis "
