@@ -146,14 +146,15 @@ for riv in rivales_recurrentes:
         rep_imp = next(i for i in importadores_por_oem[d["oem"]] if i["es_repaglas"])
         rep_fob_u = rep_imp["fob_total"] / rep_imp["unidades"]
         fob_u = d["fob_total"] / d["unidades"] if d["unidades"] else 0
-        filas.append((d["oem"], d["unidades"], d["fob_total"], fob_u, fob_u / rep_fob_u * 100 if rep_fob_u else 0))
+        filas.append((d["oem"], d["unidades"], d["fob_total"], fob_u, rep_fob_u, fob_u / rep_fob_u * 100 if rep_fob_u else 0))
     st.dataframe(
         {
             "OEM": [f[0] for f in filas],
             "Unidades": [f[1] for f in filas],
             "FOB total": [f"${f[2]:,.0f}" for f in filas],
-            "FOB/unidad": [f"${f[3]:.2f}" for f in filas],
-            "% del precio de Repaglas": [f"{f[4]:.0f}%" for f in filas],
+            "FOB/unidad (rival)": [f"${f[3]:.2f}" for f in filas],
+            "FOB/unidad (Repaglas)": [f"${f[4]:.2f}" for f in filas],
+            "% del precio de Repaglas": [f"{f[5]:.0f}%" for f in filas],
         },
         use_container_width=True, hide_index=True, key=f"detalle_{riv['nombre']}",
     )
