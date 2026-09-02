@@ -16,7 +16,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from utils.data import REP, load_competencia_maxiforce, load_importadores_por_oem  # noqa: E402
+from utils.data import REP, load_competencia_maxiforce, load_maxiforce_detalle_anual  # noqa: E402
 
 st.set_page_config(page_title="Competencia Maxiforce", page_icon="🏷️", layout="wide")
 
@@ -32,7 +32,7 @@ st.markdown(
 
 # ================= DATA =================
 data = load_competencia_maxiforce()
-importadores_por_oem = load_importadores_por_oem()
+detalle_anual = load_maxiforce_detalle_anual()
 
 RIVAL_COLORS = ["#c0392b", "#e67e22", "#8a7f6a", "#2e8b57", "#6a4c93", "#c9a227", "#4a90a4"]
 ANIOS_NUM = [2022, 2023, 2024, 2025, 2026]
@@ -127,10 +127,17 @@ st.markdown(
 st.divider()
 
 # ================= DETALLE POR SKU =================
-st.subheader("Detalle por SKU — en qué códigos compite cada rival, y a qué precio")
+st.subheader("Detalle por SKU y año — en qué códigos compite cada rival, y a qué precio")
 st.write(
-    "Mismos 4 rivales recurrentes, desglosados por SKU: unidades, FOB y precio comparado con el "
-    "de Repaglas en ese mismo código (100% = mismo precio; ADEX 2022-jul.2026 completo)."
+    "Mismos 4 rivales recurrentes, pero el precio ahora se compara **año contra año** — el precio "
+    "del rival en 2024 se compara con el precio de Repaglas en 2024, no con un promedio "
+    "2022-jul.2026 mezclado. Un promedio multi-año puede esconder que el precio de un rival "
+    "cambió mucho entre 2022 y hoy, o comparar un año viejo de Repaglas con un año reciente del "
+    "rival (o viceversa)."
+)
+st.caption(
+    "\"Sin comparación\" = Repaglas no importó ese código ese mismo año en el reporte ADEX "
+    "(no hay contra qué comparar el precio, aunque el rival sí compró)."
 )
 rivales_recurrentes = [r for r in data["rivales"] if len(r["detalle_sku"]) >= 2]
 seleccion_riv = st.multiselect(
@@ -140,24 +147,35 @@ seleccion_riv = st.multiselect(
 for riv in rivales_recurrentes:
     if riv["nombre"] not in seleccion_riv:
         continue
+    filas = sorted(
+        [d for d in detalle_anual if d["rival"] == riv["nombre"]],
+        key=lambda d: (d["oem"], d["anio"]),
+    )
     st.markdown(f"**{riv['nombre']}** — {riv['total']} unidades Maxiforce en {len(riv['detalle_sku'])} SKU")
-    filas = []
-    for d in riv["detalle_sku"]:
-        rep_imp = next(i for i in importadores_por_oem[d["oem"]] if i["es_repaglas"])
-        rep_fob_u = rep_imp["fob_total"] / rep_imp["unidades"]
-        fob_u = d["fob_total"] / d["unidades"] if d["unidades"] else 0
-        filas.append((d["oem"], d["unidades"], d["fob_total"], fob_u, rep_fob_u, fob_u / rep_fob_u * 100 if rep_fob_u else 0))
     st.dataframe(
         {
-            "OEM": [f[0] for f in filas],
-            "Unidades": [f[1] for f in filas],
-            "FOB total": [f"${f[2]:,.0f}" for f in filas],
-            "FOB/unidad (rival)": [f"${f[3]:.2f}" for f in filas],
-            "FOB/unidad (Repaglas)": [f"${f[4]:.2f}" for f in filas],
-            "% del precio de Repaglas": [f"{f[5]:.0f}%" for f in filas],
+            "OEM": [f["oem"] for f in filas],
+            "Año": [f["anio"] for f in filas],
+            "Unidades (rival)": [f["riv_u"] for f in filas],
+            "FOB/unidad (rival)": [f"${f['riv_fob_u']:.2f}" for f in filas],
+            "Unidades (Repaglas, mismo año)": [f["rep_u"] or "—" for f in filas],
+            "FOB/unidad (Repaglas, mismo año)": [f"${f['rep_fob_u']:.2f}" if f["rep_fob_u"] else "—" for f in filas],
+            "% del precio de Repaglas": [f"{f['pct']:.0f}%" if f["pct"] else "Sin comparación" for f in filas],
         },
         use_container_width=True, hide_index=True, key=f"detalle_{riv['nombre']}",
     )
+
+st.markdown(
+    "<div class='callout'><b>Lectura año contra año:</b> comparado en el mismo año, la mayoría de "
+    "estos precios sigue en 90%-140% del precio de Repaglas (a la par o más caro) — el promedio "
+    "multi-año no estaba maquillando nada grave en general. La excepción real es "
+    "<b>Fortrac en RE504914</b>: pagó 94% en 2022, subió a 104% en 2025, y bajó a <b>80% en 2026</b> "
+    "— el dato más reciente de todos y el único caso donde un rival recurrente quedó claramente por "
+    "debajo de Repaglas en su año más actual. El resto de comparaciones \"baratas\" (Mateel 77% en "
+    "RE507850, 78% en RE507920) son de <b>2023-2024</b>, no del año más reciente — no asumir que "
+    "siguen vigentes sin una compra más nueva que lo confirme.</div>",
+    unsafe_allow_html=True,
+)
 
 st.divider()
 st.markdown(

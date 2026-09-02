@@ -724,3 +724,69 @@ def load_competencia_maxiforce():
         )
     rivales.sort(key=lambda r: -r["total"])
     return {"repaglas": dict(_MAXIFORCE_REPAGLAS_RAW), "rivales": rivales}
+
+
+# Precio por rival x SKU x AÑO, comparado contra el precio de Repaglas en ESE MISMO año (no un
+# promedio 2022-jul.2026 mezclado, que puede esconder años viejos con precios distintos).
+# Calculado 2026-09-02 desde los mismos reportes ADEX reales, deduplicado por DUA+RUC+
+# cantidad+FOB. Solo incluye años en los que el rival efectivamente compró; si Repaglas no
+# importó ese código ese mismo año, rep_u queda en 0 y no hay comparación posible.
+# Tupla: (rival, oem, anio, riv_u, riv_fob, rep_u_mismo_anio, rep_fob_mismo_anio).
+_MAXIFORCE_DETALLE_ANUAL_RAW = [
+    ("Fortrac", "RE500734", 2025, 16, 1213.85, 212, 17235.01),
+    ("Fortrac", "RE500734", 2026, 5, 372.05, 100, 8563.61),
+    ("Fortrac", "RE501455", 2025, 5, 443.72, 175, 13944.26),
+    ("Fortrac", "RE501455", 2026, 2, 197.35, 115, 10238.76),
+    ("Fortrac", "RE504914", 2022, 7, 560.0, 130, 11117.97),
+    ("Fortrac", "RE504914", 2025, 6, 547.76, 238, 20840.36),
+    ("Fortrac", "RE504914", 2026, 5, 350.49, 153, 13414.61),
+    ("Fortrac", "RE507850", 2025, 24, 1834.9, 390, 27939.56),
+    ("Fortrac", "RE507850", 2026, 12, 998.59, 196, 16333.11),
+    ("Fortrac", "RE507920", 2025, 16, 1350.34, 460, 34997.35),
+    ("Fortrac", "RE507920", 2026, 8, 651.67, 240, 18440.5),
+    ("Fortrac", "RE66820", 2025, 32, 472.31, 1030, 13169.29),
+    ("Fortrac", "RE66820", 2026, 10, 144.61, 450, 5741.46),
+    ("Mateel", "RE501455", 2024, 5, 443.73, 182, 13992.72),
+    ("Mateel", "RE504914", 2024, 9, 715.18, 184, 16113.19),
+    ("Mateel", "RE507850", 2023, 6, 318.0, 184, 12699.38),
+    ("Mateel", "RE507920", 2023, 8, 735.76, 252, 19023.88),
+    ("Mateel", "RE507920", 2024, 8, 470.13, 353, 26672.57),
+    ("Mateel", "RE66820", 2024, 46, 701.16, 1090, 13947.44),
+    ("R & T Rockcat", "R116383", 2022, 12, 362.04, 250, 6043.63),
+    ("R & T Rockcat", "R116383", 2024, 18, 517.62, 300, 7852.13),
+    ("R & T Rockcat", "RE500734", 2024, 18, 1701.27, 202, 15585.22),
+    ("R & T Rockcat", "RE501455", 2024, 1, 87.94, 182, 13992.72),
+    ("R & T Rockcat", "RE504914", 2024, 6, 629.05, 184, 16113.19),
+    ("R & T Rockcat", "RE507850", 2024, 2, 151.69, 312, 21518.71),
+    ("R & T Rockcat", "RE507920", 2024, 24, 2007.81, 353, 26672.57),
+    ("R Y G Rockcat", "R116383", 2024, 12, 379.94, 300, 7852.13),
+    ("R Y G Rockcat", "RE48786", 2023, 8, 375.5, 439, 14904.33),
+    ("R Y G Rockcat", "RE500734", 2022, 12, 1233.35, 139, 12370.6),
+    ("R Y G Rockcat", "RE501455", 2022, 12, 1163.3, 135, 9994.54),
+    ("R Y G Rockcat", "RE504914", 2023, 8, 925.77, 96, 8421.31),
+    ("R Y G Rockcat", "RE507850", 2024, 4, 334.06, 312, 21518.71),
+    ("R Y G Rockcat", "RE507920", 2022, 12, 1105.59, 330, 23933.28),
+    ("R Y G Rockcat", "RE507920", 2023, 16, 1477.41, 252, 19023.88),
+    ("R Y G Rockcat", "RE536083", 2023, 12, 1272.39, 72, 5837.94),
+    ("R Y G Rockcat", "RE66820", 2022, 80, 1327.72, 1270, 15857.83),
+]
+
+
+@st.cache_data
+def load_maxiforce_detalle_anual():
+    """Precio por rival x SKU x año, comparado contra Repaglas en el MISMO año (no un promedio
+    multi-año). Devuelve una lista de dicts:
+    [{"rival", "oem", "anio", "riv_u", "riv_fob_u", "rep_u", "rep_fob_u", "pct"}, ...]
+    "pct" es None cuando Repaglas no importó ese código ese mismo año (sin comparación posible)."""
+    out = []
+    for rival, oem, anio, riv_u, riv_fob, rep_u, rep_fob in _MAXIFORCE_DETALLE_ANUAL_RAW:
+        riv_fob_u = riv_fob / riv_u if riv_u else 0.0
+        rep_fob_u = rep_fob / rep_u if rep_u else None
+        pct = (riv_fob_u / rep_fob_u * 100) if rep_fob_u else None
+        out.append(
+            {
+                "rival": rival, "oem": oem, "anio": anio, "riv_u": riv_u, "riv_fob_u": riv_fob_u,
+                "rep_u": rep_u, "rep_fob_u": rep_fob_u, "pct": pct,
+            }
+        )
+    return out
