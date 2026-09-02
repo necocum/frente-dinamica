@@ -669,3 +669,58 @@ def load_evolucion_anual():
             for nombre, por_anio in rows
         ]
     return out
+
+
+# Importadores que traen genuinamente marca MAXIFORCE (no un equivalente/otra marca) en al
+# menos uno de los 10 SKU ancla — detectado 2026-09-02 buscando el texto "MAXIFORCE" en los 5
+# campos de Descripción Comercial de los 10 reportes ADEX reales, deduplicado por
+# DUA+RUC+cantidad+FOB. Repaglas sigue siendo 96.6% de todas las unidades con esa etiqueta,
+# pero 4 empresas (R Y G Rockcat, Fortrac, Mateel, R & T Rockcat) la importan de forma
+# repetida en 5-9 de los 10 códigos — no es un lote suelto, es competencia directa de marca.
+# Tupla: (nombre, {anio: unidades} agregado en los 10 SKU, [(oem, unidades, fob_total), ...]
+# desglose por SKU en el que aparece, ordenado de mayor a menor).
+_MAXIFORCE_REPAGLAS_RAW = {2022: 2920, 2023: 2565, 2024: 3536, 2025: 3585, 2026: 1856}
+
+_MAXIFORCE_RIVALES_RAW = [
+    ("R Y G Rockcat", {2022: 116, 2023: 44, 2024: 16},
+     [("RE66820", 80, 1328), ("RE507920", 28, 2583), ("RE536083", 12, 1272), ("R116383", 12, 380),
+      ("RE501455", 12, 1163), ("RE500734", 12, 1233), ("RE48786", 8, 375), ("RE504914", 8, 926),
+      ("RE507850", 4, 334)]),
+    ("Fortrac", {2022: 7, 2025: 99, 2026: 42},
+     [("RE66820", 42, 617), ("RE507850", 36, 2833), ("RE507920", 24, 2002), ("RE500734", 21, 1586),
+      ("RE504914", 18, 1458), ("RE501455", 7, 641)]),
+    ("Mateel", {2023: 14, 2024: 68},
+     [("RE66820", 46, 701), ("RE507920", 16, 1206), ("RE504914", 9, 715), ("RE507850", 6, 318),
+      ("RE501455", 5, 444)]),
+    ("R & T Rockcat", {2022: 12, 2024: 69},
+     [("R116383", 30, 880), ("RE507920", 24, 2008), ("RE500734", 18, 1701), ("RE504914", 6, 629),
+      ("RE507850", 2, 152), ("RE501455", 1, 88)]),
+    ("Daxparts", {2022: 8}, [("RE48786", 8, 324)]),
+    ("Fabr. y Repar. Mult. e Industriales", {2025: 4}, [("RE48786", 4, 190)]),
+    ("Amazon Motors", {2026: 4}, [("RE500734", 4, 689)]),
+]
+
+
+@st.cache_data
+def load_competencia_maxiforce():
+    """Importadores que traen marca MAXIFORCE genuina (no equivalente) en al menos uno de los
+    10 SKU ancla. Devuelve:
+    {
+      "repaglas": {anio: unidades},
+      "rivales": [{"nombre", "por_anio": {anio: u}, "total",
+                   "detalle_sku": [{"oem", "unidades", "fob_total"}, ...]}, ...]
+                 ordenado de mayor a menor por unidades totales,
+    }
+    2026 es parcial (solo hasta julio)."""
+    rivales = []
+    for nombre, por_anio, detalle in _MAXIFORCE_RIVALES_RAW:
+        rivales.append(
+            {
+                "nombre": nombre,
+                "por_anio": dict(por_anio),
+                "total": sum(por_anio.values()),
+                "detalle_sku": [{"oem": oem, "unidades": u, "fob_total": fob} for oem, u, fob in detalle],
+            }
+        )
+    rivales.sort(key=lambda r: -r["total"])
+    return {"repaglas": dict(_MAXIFORCE_REPAGLAS_RAW), "rivales": rivales}
