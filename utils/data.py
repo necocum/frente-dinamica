@@ -339,93 +339,333 @@ def load_alternativas_marca():
 # Unidades importadas por año por OEM — Repaglas y sus 2 rivales más cercanos por volumen
 # histórico (no "resto" agregado) — calculado 2026-09-01 desde los mismos 10 reportes ADEX
 # reales. share_pct = % del FOB total 2022-jul.2026 de ese rival (mismo criterio que _RAW).
-# 2026 es parcial (solo hasta julio, igual que el resto del dashboard).
+# precio_vs_repaglas_pct = FOB/unidad del rival como % del FOB/unidad de Repaglas, full periodo
+# (100% = mismo precio; <75% = rival claramente más barato; >110% = más caro/premium).
+# lectura = interpretación de precio + trayectoria de compras, hecha a mano cruzando ambos ejes
+# (un rival "barato y creciendo" importa mucho más que uno "caro y en retirada", aunque el
+# share agregado de Repaglas no distinga entre ambos). 2026 es parcial (solo hasta julio).
 _TENDENCIA_IMPORTADOR_RAW = {
     "RE65966": {
         "repaglas": {2022: 80, 2023: 164, 2024: 161, 2025: 152, 2026: 100},
         "rivales": [
-            ("IPESA", 14.4, {2022: 47, 2023: 4}),
-            ("Corporación Pesquera Inca", 2.0, {2026: 4}),
+            ("IPESA", 14.4, 222, "Se retira (47→4→0→0) y siempre pagó 2.2x el precio de Repaglas — no compite en precio.",
+             {2022: 47, 2023: 4}),
+            ("Corporación Pesquera Inca", 2.0, 386, "Comprador ocasional a precio muy alto (3.9x) — no es amenaza de precio.",
+             {2026: 4}),
         ],
     },
     "R116383": {
         "repaglas": {2022: 250, 2023: 190, 2024: 300, 2025: 238, 2026: 132},
         "rivales": [
-            ("R & T Rockcat", 2.9, {2022: 12, 2024: 18}),
-            ("Suministros Automotrices e Imp.", 1.2, {2022: 36}),
+            ("R & T Rockcat", 2.9, 113, "Volumen marginal y precio a la par — no mueve el mercado.",
+             {2022: 12, 2024: 18}),
+            ("Suministros Automotrices e Imp.", 1.2, 38, "Compró barato (38% del precio) una sola vez (2022) y no volvió en 4 años — dormido, no confirmado como retiro.",
+             {2022: 36}),
         ],
     },
     "RE536083": {
         "repaglas": {2022: 56, 2023: 72, 2024: 132, 2025: 98, 2026: 64},
         "rivales": [
-            ("IPESA", 15.3, {2022: 60}),
-            ("Dinámica", 3.8, {2022: 10, 2023: 12, 2025: 10}),
+            ("IPESA", 15.3, 157, "Compró una sola vez (2022) a precio alto (1.6x) y no repitió.",
+             {2022: 60}),
+            ("Dinámica", 3.8, 73, "Más barato (73%) pero volumen chico y estable, sin señal de crecer.",
+             {2022: 10, 2023: 12, 2025: 10}),
         ],
     },
     "RE500734": {
         "repaglas": {2022: 139, 2023: 93, 2024: 242, 2025: 242, 2026: 130},
         "rivales": [
-            ("Dinámica", 3.4, {2022: 25, 2025: 30}),
-            ("Suministros Automotrices e Imp.", 2.0, {2022: 55, 2026: 10}),
+            ("Dinámica", 3.4, 63, "Barato (63%) y reactivado en 2025 (30u) tras un hueco de 2 años — vigilar si sigue en 2026.",
+             {2022: 25, 2025: 30}),
+            ("Suministros Automotrices e Imp.", 2.0, 32, "Muy barato (32%) pero cayó fuerte (55→10 parcial) — hoy no es volumen relevante.",
+             {2022: 55, 2026: 10}),
         ],
     },
     "RE66820": {
         "repaglas": {2022: 1270, 2023: 970, 2024: 1170, 2025: 1050, 2026: 450},
         "rivales": [
-            ("Dinámica", 5.0, {2022: 180, 2024: 120}),
-            ("Suministros Automotrices e Imp.", 1.9, {2022: 72, 2024: 216}),
+            ("Dinámica", 5.0, 92, "A la par de precio (92%) y bajando (180→120) — no es el riesgo principal aquí.",
+             {2022: 180, 2024: 120}),
+            ("Suministros Automotrices e Imp.", 1.9, 37, "Muy barato (37%) y casi triplicó su volumen (72→216) — el rival de precio más agresivo de toda la canasta, y va creciendo.",
+             {2022: 72, 2024: 216}),
         ],
     },
     "RE507850": {
         "repaglas": {2022: 150, 2023: 184, 2024: 328, 2025: 402, 2026: 232},
         "rivales": [
-            ("IPESA", 13.7, {2022: 103, 2023: 104}),
-            ("Fortrac", 8.9, {2022: 33, 2025: 139, 2026: 22}),
+            ("IPESA", 13.7, 145, "Se retira (103→104→0→0→0) pagando 1.45x el precio de Repaglas — no compite en precio.",
+             {2022: 103, 2023: 104}),
+            ("Fortrac", 8.9, 100, "Precio idéntico al de Repaglas (100%) y su volumen se cuadruplicó en 2025 (33→139) — la señal más seria de la canasta, no subir precio todavía.",
+             {2022: 33, 2025: 139, 2026: 22}),
         ],
     },
     "RE501455": {
         "repaglas": {2022: 135, 2023: 105, 2024: 192, 2025: 191, 2026: 115},
         "rivales": [
-            ("Dinámica", 5.4, {2022: 24, 2023: 8, 2024: 30, 2025: 20}),
-            ("Guerrero Motor's", 0.5, {2022: 40}),
+            ("Dinámica", 5.4, 66, "Barato (66%) con presencia en 4 de 5 años, pero sin tendencia clara de crecimiento.",
+             {2022: 24, 2023: 8, 2024: 30, 2025: 20}),
+            ("Guerrero Motor's", 0.5, 13, "Extremadamente barato (13% del precio) una sola vez (2022) y no volvió en 4 años — dormido, vigilar.",
+             {2022: 40}),
         ],
     },
     "RE504914": {
         "repaglas": {2022: 135, 2023: 96, 2024: 184, 2025: 238, 2026: 166},
         "rivales": [
-            ("IPESA", 17.5, {2022: 66, 2023: 50, 2024: 9, 2025: 5}),
-            ("Fortrac", 8.9, {2022: 14, 2023: 8, 2024: 9, 2025: 30, 2026: 12}),
+            ("IPESA", 17.5, 261, "Caro (2.6x) y en declive sostenido y consistente (66→50→9→5→0) — no es un problema de precio.",
+             {2022: 66, 2023: 50, 2024: 9, 2025: 5}),
+            ("Fortrac", 8.9, 238, "Caro (2.4x), con un repunte en 2025 (30u) pero sin competir en precio.",
+             {2022: 14, 2023: 8, 2024: 9, 2025: 30, 2026: 12}),
         ],
     },
     "RE507920": {
         "repaglas": {2022: 330, 2023: 252, 2024: 365, 2025: 473, 2026: 256},
         "rivales": [
-            ("IPESA", 8.2, {2022: 93, 2023: 87, 2024: 22}),
-            ("Fortrac", 7.1, {2022: 19, 2023: 16, 2025: 28, 2026: 16}),
+            ("IPESA", 8.2, 91, "A la par de precio (91%) y en retirada total (93→87→22→0→0) — el caso más limpio de los 10 SKU.",
+             {2022: 93, 2023: 87, 2024: 22}),
+            ("Fortrac", 7.1, 202, "Caro (2x) y marginal — no es amenaza de precio.",
+             {2022: 19, 2023: 16, 2025: 28, 2026: 16}),
         ],
     },
     "RE48786": {
         "repaglas": {2022: 380, 2023: 439, 2024: 620, 2025: 592, 2026: 330},
         "rivales": [
-            ("IPESA", 33.0, {2022: 526, 2023: 246}),
-            ("Dinámica", 1.1, {2022: 42, 2023: 60}),
+            ("IPESA", 33.0, 226, "Caro (2.3x) pero con volumen históricamente grande (526, 246 unidades) — se retiró 3 años (0 en 2024-2026); confirmar si no vuelve antes de asumirlo ganado.",
+             {2022: 526, 2023: 246}),
+            ("Dinámica", 1.1, 59, "Barato (59%) pero también se retiró — sin compras en 3 años.",
+             {2022: 42, 2023: 60}),
         ],
     },
+}
+
+# Semáforo de riesgo por SKU — síntesis manual de la tendencia + precio de arriba, para no
+# obligar al lector a leer las 2 lecturas de cada SKU para sacar la conclusión general.
+# vía libre = subir precio con poco riesgo · vigilar = revisar antes de decidir ·
+# no subir = hay una señal concreta de rival barato y activo/creciendo.
+_SEMAFORO_RAW = {
+    "RE65966":  ("🟢 Vía libre", "Los 2 rivales se retiraron o compran caro."),
+    "R116383":  ("🟡 Vigilar", "Rival barato (38%) dormido 4 años, no confirmado como retiro."),
+    "RE536083": ("🟡 Vigilar", "Rival caro se fue, pero el barato (73%) sigue activo aunque chico."),
+    "RE500734": ("🟡 Vigilar", "2 rivales baratos, uno reactivado en 2025 — confirmar en 2026."),
+    "RE66820":  ("🔴 No subir aún", "El rival más barato de la canasta (37%) casi triplicó su volumen."),
+    "RE507850": ("🔴 No subir aún", "Rival a precio idéntico cuadruplicó su volumen en 2025."),
+    "RE501455": ("🟡 Vigilar", "Rival extremadamente barato (13%) dormido 4 años."),
+    "RE504914": ("🟡 Vigilar", "Rivales caros, pero share bajo (42%) por fragmentación en 30 importadores."),
+    "RE507920": ("🟢 Vía libre", "El único rival a la par de precio está en retirada total."),
+    "RE48786":  ("🟡 Vigilar", "Rival caro con historial de volumen grande se retiró — confirmar antes de asumirlo."),
 }
 
 
 @st.cache_data
 def load_tendencia_por_importador():
-    """Unidades por año, por OEM: Repaglas y sus 2 rivales más cercanos por volumen histórico.
-    {oem: {"repaglas": {anio: u}, "rivales": [{"nombre", "share_pct", "por_anio": {anio: u}}, ...]}}.
+    """Unidades por año, por OEM: Repaglas y sus 2 rivales más cercanos por volumen histórico,
+    con precio relativo y lectura cualitativa de cada uno.
+    {oem: {"repaglas": {anio: u},
+           "rivales": [{"nombre", "share_pct", "precio_vs_repaglas_pct", "lectura", "por_anio": {anio: u}}, ...],
+           "semaforo", "semaforo_resumen"}}.
     2026 es parcial (solo hasta julio)."""
     out = {}
     for oem, v in _TENDENCIA_IMPORTADOR_RAW.items():
+        semaforo, resumen = _SEMAFORO_RAW[oem]
         out[oem] = {
             "repaglas": dict(v["repaglas"]),
             "rivales": [
-                {"nombre": nombre, "share_pct": share, "por_anio": dict(por_anio)}
-                for nombre, share, por_anio in v["rivales"]
+                {
+                    "nombre": nombre, "share_pct": share, "precio_vs_repaglas_pct": precio_pct,
+                    "lectura": lectura, "por_anio": dict(por_anio),
+                }
+                for nombre, share, precio_pct, lectura, por_anio in v["rivales"]
             ],
+            "semaforo": semaforo,
+            "semaforo_resumen": resumen,
         }
+    return out
+
+
+_EVOLUCION_ANUAL_RAW = {
+    "RE65966": [
+        ("Repaglas", {2022: 80, 2023: 164, 2024: 161, 2025: 152, 2026: 100}),
+        ("IPESA", {2022: 47, 2023: 4}),
+        ("Corporación Pesquera Inca", {2026: 4}),
+        ("Nuevo Concepto de Maquinarias Agro Industrial", {2022: 1}),
+    ],
+    "R116383": [
+        ("Repaglas", {2022: 250, 2023: 190, 2024: 300, 2025: 238, 2026: 132}),
+        ("Suministros Automotrices e Imp.", {2022: 36}),
+        ("R & T Rockcat", {2022: 12, 2024: 18}),
+        ("Agritractor", {2022: 12}),
+        ("R Y G Rockcat", {2024: 12}),
+        ("Pro & Ma Nuevo Horizonte", {2024: 4}),
+    ],
+    "RE536083": [
+        ("Repaglas", {2022: 56, 2023: 72, 2024: 132, 2025: 98, 2026: 64}),
+        ("IPESA", {2022: 60}),
+        ("Dinámica", {2022: 10, 2023: 12, 2025: 10}),
+        ("Fortrac", {2023: 20, 2024: 4}),
+        ("R Y G Rockcat", {2023: 12}),
+        ("JPK Mundo Parts", {2025: 8}),
+    ],
+    "RE500734": [
+        ("Repaglas", {2022: 139, 2023: 93, 2024: 242, 2025: 242, 2026: 130}),
+        ("Suministros Automotrices e Imp.", {2022: 55, 2026: 10}),
+        ("Dinámica", {2022: 25, 2025: 30}),
+        ("P&G Repuestos", {2026: 40}),
+        ("Fortrac", {2023: 10, 2025: 16, 2026: 5}),
+        ("R & T Rockcat", {2024: 24}),
+        ("Repuestos y Accesorios El Paraíso", {2022: 6, 2024: 10, 2026: 1}),
+        ("T&E Import Perú Repuestos", {2023: 15}),
+        ("R Y G Rockcat", {2022: 12}),
+        ("Tralex", {2022: 3, 2023: 2, 2026: 2}),
+        ("Guerrero Motor's", {2023: 5, 2026: 2}),
+        ("Maquitracto Selva", {2025: 6}),
+        ("Construcción Mecánica J&K", {2025: 5}),
+        ("Amazon Motors", {2026: 4}),
+        ("Autorepuestos A&T", {2024: 1, 2025: 2}),
+        ("Agroindustrias San Jacinto", {2025: 3}),
+        ("Agritractor", {2022: 2}),
+        ("Serviagri de Ica", {2022: 1, 2023: 1}),
+        ("Pitahaya Servicios Integrales", {2023: 2}),
+        ("Tractus Implementos y Partes", {2025: 2}),
+        ("Cisar", {2023: 1}),
+    ],
+    "RE66820": [
+        ("Repaglas", {2022: 1270, 2023: 970, 2024: 1170, 2025: 1050, 2026: 450}),
+        ("Dinámica", {2022: 180, 2024: 120}),
+        ("Suministros Automotrices e Imp.", {2022: 72, 2024: 216}),
+        ("R Y G Rockcat", {2022: 80}),
+        ("T&E Import Perú Repuestos", {2023: 50}),
+        ("Mateel", {2024: 46}),
+        ("Fortrac", {2025: 32, 2026: 10}),
+        ("Tractorandinas Parts", {2022: 10}),
+        ("JPK Mundo Parts", {2025: 8}),
+        ("AG Import Parve", {2025: 8}),
+        ("Rinai Repuestos", {2025: 1}),
+    ],
+    "RE507850": [
+        ("Repaglas", {2022: 150, 2023: 184, 2024: 328, 2025: 402, 2026: 232}),
+        ("IPESA", {2022: 103, 2023: 104}),
+        ("Fortrac", {2022: 33, 2025: 139, 2026: 22}),
+        ("Dinámica", {2022: 20, 2024: 40}),
+        ("Cisar", {2024: 50}),
+        ("Maquinarias y Repuestos", {2023: 18, 2024: 12, 2026: 6}),
+        ("Mateel", {2023: 6, 2026: 12}),
+        ("Tractor Import", {2022: 4, 2024: 4}),
+        ("MODASA", {2023: 8}),
+        ("IM Selva", {2024: 6, 2025: 1}),
+        ("Italtrac Selva", {2023: 6}),
+        ("ITM Tractor", {2024: 6}),
+        ("Monsante", {2025: 6}),
+        ("R Y G Rockcat", {2024: 4}),
+        ("R & T Rockcat", {2024: 2}),
+    ],
+    "RE501455": [
+        ("Repaglas", {2022: 135, 2023: 105, 2024: 192, 2025: 191, 2026: 115}),
+        ("Dinámica", {2022: 24, 2023: 8, 2024: 30, 2025: 20}),
+        ("Guerrero Motor's", {2022: 40}),
+        ("Suministros Automotrices e Imp.", {2022: 18, 2024: 18}),
+        ("IPESA", {2022: 35}),
+        ("Fortrac", {2023: 6, 2025: 5, 2026: 2}),
+        ("R Y G Rockcat", {2022: 12}),
+        ("Mateel", {2023: 1, 2024: 5, 2026: 2}),
+        ("JPK Mundo Parts", {2025: 8}),
+        ("Construcción Mecánica J&K", {2025: 6}),
+        ("MODASA", {2023: 5}),
+        ("Monsante", {2022: 4}),
+        ("Agritractor", {2022: 4}),
+        ("Repuestos y Accesorios El Paraíso", {2024: 4}),
+        ("P&G Repuestos", {2026: 3}),
+        ("Solutra del Perú", {2024: 1, 2026: 1}),
+        ("Pro & Ma Nuevo Horizonte", {2024: 2}),
+        ("National Air & Motor", {2023: 1}),
+        ("R & T Rockcat", {2024: 1}),
+        ("Geprocem", {2025: 1}),
+        ("Corporación Pesquera Inca", {2026: 1}),
+    ],
+    "RE504914": [
+        ("Repaglas", {2022: 135, 2023: 96, 2024: 184, 2025: 238, 2026: 166}),
+        ("IPESA", {2022: 66, 2023: 50, 2024: 9, 2025: 5}),
+        ("Fortrac", {2022: 14, 2023: 8, 2024: 9, 2025: 30, 2026: 12}),
+        ("Suministros Automotrices e Imp.", {2023: 70}),
+        ("Dinámica", {2022: 20, 2024: 20}),
+        ("Maquinarias y Repuestos", {2022: 9, 2023: 1, 2024: 12, 2025: 4, 2026: 3}),
+        ("R Y G Rockcat", {2022: 12, 2023: 8}),
+        ("T&E Import Perú Repuestos", {2023: 15}),
+        ("Mateel", {2024: 10, 2026: 5}),
+        ("Monsante", {2022: 4, 2023: 1, 2024: 8}),
+        ("P&G Repuestos", {2026: 10}),
+        ("IM Selva", {2022: 3, 2023: 1, 2024: 2, 2025: 3}),
+        ("Italtrac Selva", {2022: 4, 2023: 2}),
+        ("R & T Rockcat", {2024: 6}),
+        ("JPK Mundo Parts", {2025: 6}),
+        ("Agritractor", {2022: 5}),
+        ("MODASA", {2023: 5}),
+        ("Tractor Import", {2023: 2, 2024: 1, 2025: 1}),
+        ("Geprocem", {2025: 3}),
+        ("Solutra del Perú", {2026: 3}),
+        ("(Persona natural — dato protegido)", {2024: 1, 2025: 1}),
+        ("Cisar", {2025: 2}),
+        ("Corporación Pesquera Inca", {2026: 2}),
+        ("Baustelle", {2022: 1}),
+        ("World Motors", {2022: 1}),
+        ("National Air & Motor", {2023: 1}),
+        ("Parts and Services BVC", {2023: 1}),
+        ("Guerrero Motor's", {2024: 1}),
+        ("Repadiesel Repuestos", {2025: 1}),
+        ("Emimaq", {2026: 1}),
+    ],
+    "RE507920": [
+        ("Repaglas", {2022: 330, 2023: 252, 2024: 365, 2025: 473, 2026: 256}),
+        ("IPESA", {2022: 93, 2023: 87, 2024: 22}),
+        ("Fortrac", {2022: 19, 2023: 16, 2025: 28, 2026: 16}),
+        ("Dinámica", {2022: 20, 2023: 7, 2024: 21, 2025: 13}),
+        ("R Y G Rockcat", {2022: 12, 2023: 16}),
+        ("Mateel", {2023: 8, 2024: 8, 2026: 8}),
+        ("R & T Rockcat", {2024: 24}),
+        ("JPK Mundo Parts", {2025: 16}),
+        ("Tractor Import", {2022: 4, 2023: 4, 2024: 6}),
+        ("MODASA", {2023: 12}),
+        ("Italtrac Selva", {2022: 6}),
+        ("Monsante", {2023: 6}),
+        ("National Air & Motor", {2023: 4}),
+        ("Solutra del Perú", {2024: 4}),
+    ],
+    "RE48786": [
+        ("Repaglas", {2022: 380, 2023: 439, 2024: 620, 2025: 592, 2026: 330}),
+        ("IPESA", {2022: 526, 2023: 246}),
+        ("Dinámica", {2022: 42, 2023: 60}),
+        ("Suministros Automotrices e Imp.", {2022: 12, 2023: 36, 2024: 50}),
+        ("Tractor Import", {2022: 10, 2023: 16, 2024: 36, 2025: 9, 2026: 4}),
+        ("Maquinarias y Repuestos", {2022: 6, 2023: 12, 2024: 10, 2025: 15, 2026: 18}),
+        ("IM Selva", {2022: 24, 2023: 6, 2024: 6, 2025: 18}),
+        ("Italtrac Selva", {2022: 16, 2023: 38}),
+        ("Fortrac", {2023: 50}),
+        ("Monsante", {2022: 20, 2024: 20, 2025: 5}),
+        ("Inversiones Palmetto", {2023: 24}),
+        ("Gamotor Electronic", {2026: 20}),
+        ("Mateel", {2022: 18}),
+        ("Maquitracto Selva", {2025: 16}),
+        ("Tractor House Perú", {2026: 16}),
+        ("T&E Import Perú Repuestos", {2023: 12}),
+        ("JPK Mundo Parts", {2025: 12}),
+        ("Construcción Mecánica J&K", {2025: 12}),
+        ("Daxparts", {2022: 8}),
+        ("R Y G Rockcat", {2023: 8}),
+        ("Cisar", {2023: 6}),
+        ("Manserved Dealer", {2023: 6}),
+        ("Fabr. y Repar. Mult. e Industriales", {2025: 4}),
+        ("Corporación Pesquera Inca", {2026: 4}),
+    ],
+}
+
+
+@st.cache_data
+def load_evolucion_anual():
+    """Unidades por año, TODOS los importadores (no solo los 2 rivales principales), por OEM —
+    para inspección numérica de detalle. {oem: [{"nombre", "por_anio": {anio: u}, "total"}, ...]},
+    ordenado de mayor a menor por unidades totales. 2026 es parcial (solo hasta julio)."""
+    out = {}
+    for oem, rows in _EVOLUCION_ANUAL_RAW.items():
+        out[oem] = [
+            {"nombre": nombre, "por_anio": dict(por_anio), "total": sum(por_anio.values())}
+            for nombre, por_anio in rows
+        ]
     return out

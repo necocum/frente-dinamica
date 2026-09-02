@@ -15,6 +15,7 @@ import streamlit as st
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from utils.data import (  # noqa: E402
     REP, DIN, GOOD, AMBER, BAD, load_sku_ancla, load_alternativas_marca, load_tendencia_por_importador,
+    load_evolucion_anual,
 )
 
 st.set_page_config(page_title="SKU Ancla · Maxiforce", page_icon="🔧", layout="wide")
@@ -62,6 +63,7 @@ skus = [
 
 alternativas = load_alternativas_marca()
 tendencia = load_tendencia_por_importador()
+evolucion = load_evolucion_anual()
 
 
 def sustitutos_str(oem):
@@ -160,11 +162,28 @@ st.divider()
 st.subheader("Tendencia de importación por año, por importador")
 st.write(
     "Unidades importadas por año en cada código — Repaglas frente a sus **2 rivales más cercanos por volumen "
-    "histórico** en ese SKU (no un agregado de \"resto del mercado\"). Cada rival lleva su share de FOB "
-    "2022-jul.2026 entre paréntesis. **2026 es parcial** (solo hasta julio), así que su barra es más baja por "
-    "diseño, no por caída real de demanda. Cuando un rival no importó nada un año, simplemente no tiene barra "
-    "ese año — no significa cero ventas, solo cero importación directa registrada."
+    "histórico** en ese SKU (no un agregado de \"resto del mercado\"). Cada rival lleva su **share de FOB**, su "
+    "**precio vs. Repaglas** y una **lectura** que cruza ambos ejes — un rival barato y creciendo importa mucho "
+    "más que uno caro y en retirada, aunque el share agregado de Repaglas no distinga entre los dos. "
+    "**2026 es parcial** (solo hasta julio), así que su barra es más baja por diseño, no por caída real de "
+    "demanda; cuando un rival no importó nada un año, simplemente no tiene barra ese año."
 )
+st.markdown(
+    "<div class='callout'><b>Semáforo por SKU:</b> síntesis de precio + trayectoria de cada rival — no es lo "
+    "mismo un rival caro que se retira (vía libre) que uno barato que crece (no subir todavía), aunque ambos "
+    "convivan con el mismo share agregado de Repaglas.</div>",
+    unsafe_allow_html=True,
+)
+st.dataframe(
+    {
+        "SKU": [s[1] for s in skus],
+        "Share Repaglas": [f"{s[5]:.1f}%" for s in skus],
+        "Semáforo": [tendencia[s[0]]["semaforo"] for s in skus],
+        "Por qué": [tendencia[s[0]]["semaforo_resumen"] for s in skus],
+    },
+    use_container_width=True, hide_index=True,
+)
+
 seleccion_t = st.multiselect(
     "SKU a inspeccionar", options=[s[1] for s in skus], default=[s[1] for s in skus], key="sel_tendencia",
     format_func=lambda s: f"{s} ({[x[0] for x in skus if x[1]==s][0]})",
@@ -175,8 +194,8 @@ RIVAL_COLORS = ["#c0392b", "#8a7f6a"]
 for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
     if sku not in seleccion_t:
         continue
-    st.markdown(f"**{sku}** ({code}) — {desc}")
-    serie = tendencia.get(code, {"repaglas": {}, "rivales": []})
+    serie = tendencia.get(code, {"repaglas": {}, "rivales": [], "semaforo": "", "semaforo_resumen": ""})
+    st.markdown(f"**{sku}** ({code}) — {desc} &nbsp; {serie['semaforo']}")
     rep_vals = [serie["repaglas"].get(a, 0) for a in anios_num]
     fig3 = go.Figure()
     fig3.add_bar(x=anios_label, y=rep_vals, name="Repaglas", marker_color=REP)
@@ -184,7 +203,8 @@ for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
         riv_vals = [riv["por_anio"].get(a, 0) for a in anios_num]
         color = DIN if riv["nombre"] == "Dinámica" else RIVAL_COLORS[i % len(RIVAL_COLORS)]
         fig3.add_bar(
-            x=anios_label, y=riv_vals, name=f"{riv['nombre']} ({riv['share_pct']:.1f}% share)",
+            x=anios_label, y=riv_vals,
+            name=f"{riv['nombre']} ({riv['share_pct']:.1f}% share, {riv['precio_vs_repaglas_pct']}% del precio)",
             marker_color=color,
         )
     if not serie["rivales"]:
@@ -195,15 +215,53 @@ for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
         yaxis_title="Unidades", plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     )
     st.plotly_chart(fig3, use_container_width=True, key=f"tendencia_{code}")
+    for riv in serie["rivales"]:
+        st.caption(f"**{riv['nombre']}** ({riv['precio_vs_repaglas_pct']}% del precio de Repaglas) — {riv['lectura']}")
 
 st.markdown(
-    "<div class='callout'><b>Lectura:</b> el volumen de Repaglas crece de forma sostenida en la mayoría de "
-    "códigos hasta 2025 (ej. RE507920: 330→473 unidades/año 2022-2025), con 2026 en camino a un año similar o "
-    "mayor una vez anualizado el dato parcial. Sus rivales más cercanos, en cambio, casi nunca importan todos "
-    "los años — <b>IPESA</b> (el rival recurrente en 7 de los 10 SKU) entra y sale del mercado en lotes "
-    "puntuales, sin la cadencia estable de Repaglas. Eso es justamente lo que sostiene el share: no es solo "
-    "mayor volumen, es volumen más predecible.</div>",
+    "<div class='callout'><b>Lectura general:</b> el volumen de Repaglas crece de forma sostenida en la mayoría "
+    "de códigos hasta 2025 (ej. RE507920: 330→473 unidades/año 2022-2025). Pero \"los rivales se achican\" NO es "
+    "un patrón uniforme: en <b>RE65966</b> y <b>RE507920</b> el rival cercano en precio se retira por completo; "
+    "en <b>RE66820</b> y <b>RE507850</b> ocurre lo contrario — un rival barato (RE66820) o a precio idéntico "
+    "(RE507850) multiplicó su volumen en su año más reciente con dato completo. En el resto (R116383, RE536083, "
+    "RE500734, RE501455, RE504914, RE48786) hay rivales muy baratos que compraron una sola vez y no volvieron: "
+    "no es retirada confirmada, es ausencia de datos — vale la pena revisar si reaparecen en 2026.</div>",
     unsafe_allow_html=True,
+)
+
+st.divider()
+
+# ================= CUADRO DE EVOLUCIÓN COMPLETO =================
+st.subheader("Cuadro de evolución por año — todos los proveedores")
+st.write(
+    "Mismo dato que arriba pero sin recorte a 2 rivales y en números, no en gráfico — para inspeccionar el "
+    "detalle completo de cada SKU, incluyendo importadores muy chicos (1-2 unidades) que no entran en el "
+    "gráfico. Ordenado de mayor a menor por unidades totales 2022-jul.2026."
+)
+seleccion_ev = st.multiselect(
+    "SKU a inspeccionar", options=[s[1] for s in skus], default=[skus[0][1]], key="sel_evolucion",
+    format_func=lambda s: f"{s} ({[x[0] for x in skus if x[1]==s][0]})",
+)
+for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
+    if sku not in seleccion_ev:
+        continue
+    st.markdown(f"**{sku}** ({code}) — {desc} · {n} importadores")
+    filas = evolucion.get(code, [])
+    st.dataframe(
+        {
+            "Importador": [f["nombre"] for f in filas],
+            "2022": [f["por_anio"].get(2022, 0) for f in filas],
+            "2023": [f["por_anio"].get(2023, 0) for f in filas],
+            "2024": [f["por_anio"].get(2024, 0) for f in filas],
+            "2025": [f["por_anio"].get(2025, 0) for f in filas],
+            "2026*": [f["por_anio"].get(2026, 0) for f in filas],
+            "Total 2022-jul.26": [f["total"] for f in filas],
+        },
+        use_container_width=True, hide_index=True, key=f"evolucion_{code}",
+    )
+st.caption(
+    "0 = sin importaciones registradas ese año (no cero ventas, cero importación directa detectada en ADEX "
+    "para ese código). 2026 es parcial, solo hasta julio."
 )
 
 st.divider()
