@@ -35,18 +35,19 @@ st.markdown(
 sku_ancla = load_sku_ancla()
 
 # Detalle de precio de compra (FOB/unidad) por rival, solo 2025-2026 — específico de esta
-# hoja, no se necesita en el resto del dashboard.
+# hoja, no se necesita en el resto del dashboard. Recalculado 2026-09-01 desde los reportes
+# ADEX reales (ver utils/data.py); top 3 rivales por unidades en el periodo.
 PRICE_RIVALS = {
-    "RE65966": [],
+    "RE65966": [("Corporación Pesquera Inca", 269.42, 4)],
     "R116383": [],
     "RE536083": [("Dinámica", 60.77, 10), ("JPK Mundo Parts", 65.55, 8)],
-    "RE500734": [("Dinámica", 55.00, 30), ("Fortrac", 75.52, 21), ("Amazon Motors", 172.24, 4)],
+    "RE500734": [("P&G Repuestos", 25.58, 40), ("Dinámica", 55.00, 30), ("Fortrac", 75.52, 21)],
     "RE66820": [("Fortrac", 14.69, 42), ("JPK Mundo Parts", 13.11, 8), ("AG Import Parve", 5.00, 8)],
-    "RE507850": [("Fortrac", 78.71, 36), ("Mateel", 39.55, 12)],
-    "RE501455": [("Dinámica", 51.66, 20), ("Fortrac", 91.58, 7), ("JPK Mundo Parts", 53.36, 8)],
-    "RE504914": [("Maquinarias y Repuestos", 544.70, 4), ("Corporación Pesquera Inca", 603.92, 3), ("Fortrac", 81.66, 11)],
+    "RE507850": [("Fortrac", 58.70, 161), ("Mateel", 39.55, 12), ("Monsante", 233.11, 6)],
+    "RE501455": [("Dinámica", 51.66, 20), ("JPK Mundo Parts", 53.36, 8), ("Fortrac", 91.58, 7)],
+    "RE504914": [("Fortrac", 132.34, 42), ("P&G Repuestos", 45.46, 10), ("Maquinarias y Repuestos", 546.10, 7)],
     "RE507920": [("Fortrac", 144.56, 44), ("JPK Mundo Parts", 57.54, 16), ("Dinámica", 55.71, 13)],
-    "RE48786": [("Maquinarias y Repuestos", 146.44, 33), ("IM Selva", 107.98, 24), ("Tractor Import", 89.66, 13)],
+    "RE48786": [("Maquinarias y Repuestos", 146.44, 33), ("Gamotor Electronic", 16.50, 20), ("IM Selva", 107.72, 18)],
 }
 
 # Tuplas (code, sku, desc, cant26, venta26, share, n_imp, precio, rivals) para no tocar
@@ -90,8 +91,8 @@ shares = [s[5] for s in skus]
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("Share promedio (10 SKU)", f"{sum(shares)/len(shares):.1f}%")
 k2.metric("SKU con share > 85%", f"{sum(1 for s in shares if s>85)} / 10")
-k3.metric("Único SKU disputado", "RE48786", "43.9% — IPESA 33.2%")
-k4.metric("Rival recurrente", "Dinámica", "único con compras en 6 de 10 SKU, siempre 2-6%")
+k3.metric("SKU más disputados", "RE504914 · RE48786", "42.3% y 44.7% — IPESA es el rival en ambos")
+k4.metric("Rival recurrente", "IPESA", "líder o segundo en 7 de 10 SKU — no Dinámica")
 
 st.divider()
 
@@ -123,11 +124,12 @@ for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
     c2.markdown(share_bar(share, color), unsafe_allow_html=True)
 
 st.markdown(
-    "<div class='callout'><b>Lectura:</b> en 9 de los 10 códigos Repaglas concentra 74-99.9% del FOB importado "
-    "por todo el mercado peruano — liderazgo sostenido, no un pico puntual (dato es acumulado 2022–jul.2026). "
-    "El único código realmente disputado es <b>RE48786</b> (inyector), donde IPESA tiene un tercio del mercado — "
-    "distinto del resto porque cae en otra partida arancelaria (8481, válvulas/inyección) en vez de 8409 "
-    "(partes de motor) del resto de la canasta.</div>",
+    "<div class='callout'><b>Lectura:</b> Repaglas lidera los 10 códigos, pero el share real (recalculado desde "
+    "los reportes ADEX completos, no la muestra a mano anterior) es más disputado de lo que parecía: solo "
+    "<b>R116383</b> (94.2%) y <b>RE66820</b> (88.7%) superan 85% de share; en el otro extremo, <b>RE504914</b> "
+    "(42.3%) y <b>RE48786</b> (44.7%) están por debajo de la mitad del mercado. En ambos casos el rival de fondo "
+    "es el mismo: <b>IPESA</b>, que aparece con volumen material en 7 de los 10 códigos — no Dinámica, que solo "
+    "compite de forma marginal (2-6% de share) en la mitad de la canasta.</div>",
     unsafe_allow_html=True,
 )
 
@@ -167,7 +169,8 @@ st.markdown(
 st.divider()
 st.markdown(
     "**Margen actual (Bsale, Ene-Jul 2026):** los 10 SKU mantienen margen estable en **40-42%**, sin señal de "
-    "erosión frente a Ene-Jul 2025. Con liderazgo de 74-99.9% de share sostenido en años (no un dato puntual), "
-    "hay espacio para subir precio de forma selectiva en los 8-9 códigos sin competencia real — manteniendo "
-    "precio agresivo en RE48786, el único donde IPESA disputa el mercado con volumen real."
+    "erosión frente a Ene-Jul 2025. Con el share recalculado, solo 2 códigos (R116383, RE66820) tienen liderazgo "
+    "por encima de 85% sin discusión; hay espacio para subir precio en esos y en los 4-5 con share 68-84% donde "
+    "el rival material no alcanza escala — pero en **RE504914** y **RE48786** (42-45% de share, IPESA como "
+    "competidor real con volumen) no conviene tocar precio todavía sin antes revisar la sección Poder de Precio."
 )

@@ -251,6 +251,11 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
 
     total_u = sum(i["unidades"] for i in r["importadores"])
     tabla_imp = sorted(r["importadores"], key=lambda i: -i["unidades"])
+
+    def origen_str(i):
+        origenes = sorted(i["origenes"], key=lambda o: -o["unidades"])
+        return ", ".join(f"{o['pais']} ({o['unidades']})" for o in origenes)
+
     st.dataframe(
         {
             "Importador": [("Repaglas" if i["es_repaglas"] else i["nombre"]) for i in tabla_imp],
@@ -258,10 +263,16 @@ for r in [x for x in ROWS if x["sku"] in seleccion_b]:
             "FOB total (2022-jul.26)": [f"${i['fob_total']:,.0f}" for i in tabla_imp],
             "FOB/unidad": [f"${(i['fob_total']/i['unidades']) if i['unidades'] else 0:.2f}" for i in tabla_imp],
             "% de unidades del mercado": [f"{i['unidades']/total_u*100:.1f}%" for i in tabla_imp],
+            "País de origen": [origen_str(i) for i in tabla_imp],
             "¿Material?": ["—" if i["es_repaglas"] else ("Sí" if i.get("material") else "No") for i in tabla_imp],
         },
         use_container_width=True, hide_index=True, key=f"tabla_{r['oem']}",
         column_config={
+            "País de origen": st.column_config.TextColumn(
+                "País de origen",
+                help="País(es) de embarque de este importador para este SKU, con unidades entre paréntesis "
+                     "cuando trae de más de uno (ADEX 2022-jul.2026).",
+            ),
             "¿Material?": st.column_config.TextColumn(
                 "¿Material?",
                 help=f"Sí = trajo al menos {MATERIALIDAD_UMBRAL*100:.0f}% de las unidades de Repaglas para este "

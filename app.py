@@ -69,22 +69,24 @@ brand_din = [("Carraro", 2162), ("ZF", 1412), ("AGCO", 1188), ("Bepco", 1068), (
              ("CNH", 899), ("Eaton", 831), ("Assur Power", 388)]
 
 sku1 = [
-    ["Representaciones Agrícolas S.R.L.", "REP", 124383, 1659, 74.85, "EE.UU. / India / R.U.", "Maxiforce"],
-    ["Ipesa S.A.C.", "", 13830, 202, 68.70, "Estados Unidos", "John Deere"],
-    ["Fortrac S.A.C.", "", 11974, 79, 157.71, "Estados Unidos", "John Deere"],
-    ["R Y G Rockcat E.I.R.L.", "", 2583, 28, 92.24, "Estados Unidos", "Maxiforce"],
-    ["Tractor Import SAC", "", 2605, 14, 193.73, "Brasil / EE.UU.", "John Deere"],
-    ["Dinámica Implementos & Piezas S.A.C.", "DIN", 3406, 61, 55.76, "China", "Assur Power"],
+    ["Representaciones Agrícolas S.R.L.", "REP", 125602, 1676, 74.94, "Estados Unidos / Reino Unido / India", "Maxiforce"],
+    ["Ipesa S.A.C.", "", 13830, 202, 68.47, "Estados Unidos", "John Deere"],
+    ["Fortrac S.A.C.", "", 11974, 79, 151.58, "Estados Unidos", "John Deere"],
+    ["R Y G Rockcat E.I.R.L.", "", 2583, 28, 92.25, "Estados Unidos", "Maxiforce"],
+    ["Tractor Import SAC", "", 2605, 14, 186.05, "Estados Unidos / Brasil", "John Deere"],
+    ["Dinámica Implementos & Piezas S.A.C.", "DIN", 3406, 61, 55.84, "China", "Assur Power"],
     ["Mateel E.I.R.L.", "", 1516, 24, 63.15, "Estados Unidos", "—"],
     ["Monsante EIRL", "", 1028, 6, 171.40, "Estados Unidos", "—"],
-    ["National Air & Motor Co. S.R.L.", "", 1001, 4, 250.35, "Estados Unidos", "—"],
+    ["National Air & Motor Co. S.R.L.", "", 1001, 4, 250.34, "Estados Unidos", "—"],
     ["Motores Diesel Andinos MODASA", "", 832, 12, 69.33, "China", "—"],
-    ["JPK Mundo Parts E.I.R.L.", "", 921, 16, 57.54, "China", "—"],
-    ["Italtrac Selva SAC", "", 983, 6, 162.98, "Estados Unidos", "John Deere"],
+    ["JPK Mundo Parts E.I.R.L.", "", 921, 16, 57.55, "China", "—"],
+    ["Italtrac Selva SAC", "", 983, 6, 163.86, "Estados Unidos", "John Deere"],
     ["Solutra del Perú SRL", "", 272, 4, 67.99, "China", "—"],
     ["R & T Rocckcat E.I.R.L.", "", 2008, 24, 83.66, "Estados Unidos", "Maxiforce"],
 ]
 sku1.sort(key=lambda r: -r[2])
+# Recalculado 2026-09-01 desde los 10 reportes ADEX reales (utils/data.py) — reemplaza la
+# investigación a mano previa para este SKU (los valores casi no cambiaron: valida el método).
 
 
 def usd(n):
@@ -167,7 +169,7 @@ k1.metric("FOB importado 2025", "$2.89M", "entre ambas empresas")
 k2.metric("Participación Repaglas", "28.6%", "del FOB combinado 2025")
 k3.metric("Brecha Dinámica / Repaglas", "2.3×", "promedio 2022–2025")
 k4.metric("Envíos por año (DUAs)", "21 vs 68", "Repaglas vs. Dinámica")
-k5.metric("Liderazgo en RE507920", "74.3%", "share de Repaglas en su SKU ancla")
+k5.metric("Liderazgo en RE507920", "74.5%", "share de Repaglas en su SKU ancla")
 
 st.divider()
 
@@ -293,15 +295,15 @@ st.markdown(
 )
 st.markdown(
     f"<div class='share-bar'>"
-    f"<div class='share-seg' style='width:74.3%;background:{REP};'>Repaglas · 74.3% del FOB de mercado</div>"
-    f"<div class='share-seg' style='width:25.7%;background:{DIN};'>Resto · 25.7%</div>"
+    f"<div class='share-seg' style='width:74.5%;background:{REP};'>Repaglas · 74.5% del FOB de mercado</div>"
+    f"<div class='share-seg' style='width:25.5%;background:{DIN};'>Resto · 25.5%</div>"
     f"</div>",
     unsafe_allow_html=True,
 )
 st.caption(
-    "Sobre US$ 167,342 FOB y 2,139 unidades importadas por todo el mercado peruano en esta referencia, Repaglas "
-    "concentra 74.3% del valor y 77.6% de las unidades, con 50 embarques desde EE.UU. bajo su propia marca "
-    "Maxiforce, a un precio consistentemente estable de US$ 75–77/unidad desde 2022."
+    "Sobre US$ 168,562 FOB y 2,156 unidades importadas por todo el mercado peruano en esta referencia (ADEX, "
+    "2022–jul.2026), Repaglas concentra 74.5% del valor y 77.7% de las unidades, mayoritariamente desde EE.UU. "
+    "bajo su propia marca Maxiforce, a un precio consistentemente estable de US$ 75–77/unidad desde 2022."
 )
 st.dataframe(
     {
