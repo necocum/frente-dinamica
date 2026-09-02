@@ -13,7 +13,9 @@ import plotly.graph_objects as go
 import streamlit as st
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from utils.data import REP, DIN, GOOD, AMBER, BAD, load_sku_ancla  # noqa: E402
+from utils.data import (  # noqa: E402
+    REP, DIN, GOOD, AMBER, BAD, load_sku_ancla, load_alternativas_marca, load_tendencia_anual,
+)
 
 st.set_page_config(page_title="SKU Ancla · Maxiforce", page_icon="🔧", layout="wide")
 
@@ -57,6 +59,16 @@ skus = [
      r["n_importadores"], r["precio_fob_rep_usd"], PRICE_RIVALS[r["oem"]])
     for r in sku_ancla
 ]
+
+alternativas = load_alternativas_marca()
+tendencia = load_tendencia_anual()
+
+
+def sustitutos_str(oem):
+    alts = alternativas.get(oem, [])
+    if not alts:
+        return "— (solo Maxiforce)"
+    return " · ".join(f"{a['sku']} ({a['marca']})" for a in alts)
 
 
 def usd(n):
@@ -102,6 +114,7 @@ st.dataframe(
     {
         "SKU Repaglas": [s[1] for s in skus],
         "OEM": [s[0] for s in skus],
+        "SKU sustitutos (catálogo Bsale)": [sustitutos_str(s[0]) for s in skus],
         "Producto": [s[2] for s in skus],
         "Cant. vendida 2026": [s[3] for s in skus],
         "Venta S/ 2026": [f"S/{s[4]:,.0f}" for s in skus],
@@ -111,6 +124,14 @@ st.dataframe(
     },
     use_container_width=True,
     hide_index=True,
+    column_config={
+        "SKU sustitutos (catálogo Bsale)": st.column_config.TextColumn(
+            "SKU sustitutos (catálogo Bsale)",
+            help="Otras marcas del catálogo Bsale que cubren el mismo código OEM (Sección C de "
+                 "\"Poder de Precio\" tiene precio y venta de cada una). \"— (solo Maxiforce)\" = "
+                 "no hay alternativa de marca en catálogo hoy.",
+        ),
+    },
 )
 
 st.divider()
@@ -130,6 +151,48 @@ st.markdown(
     "(42.3%) y <b>RE48786</b> (44.7%) están por debajo de la mitad del mercado. En ambos casos el rival de fondo "
     "es el mismo: <b>IPESA</b>, que aparece con volumen material en 7 de los 10 códigos — no Dinámica, que solo "
     "compite de forma marginal (2-6% de share) en la mitad de la canasta.</div>",
+    unsafe_allow_html=True,
+)
+
+st.divider()
+
+# ================= TENDENCIA ANUAL =================
+st.subheader("Tendencia de importación por año")
+st.write(
+    "Unidades importadas por todo el mercado peruano en cada código, año a año — Repaglas frente al resto de "
+    "importadores. **2026 es parcial** (solo hasta julio, igual que el resto del dashboard), así que su barra es "
+    "más baja por diseño, no por caída real de demanda."
+)
+seleccion_t = st.multiselect(
+    "SKU a inspeccionar", options=[s[1] for s in skus], default=[s[1] for s in skus], key="sel_tendencia",
+    format_func=lambda s: f"{s} ({[x[0] for x in skus if x[1]==s][0]})",
+)
+anios = [2022, 2023, 2024, 2025, "2026*"]
+primero = True
+for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
+    if sku not in seleccion_t:
+        continue
+    st.markdown(f"**{sku}** ({code}) — {desc}")
+    serie = tendencia.get(code, {})
+    rep_vals = [serie.get(a, {}).get("repaglas", 0) for a in [2022, 2023, 2024, 2025, 2026]]
+    resto_vals = [serie.get(a, {}).get("resto", 0) for a in [2022, 2023, 2024, 2025, 2026]]
+    fig3 = go.Figure()
+    fig3.add_bar(x=anios, y=rep_vals, name="Repaglas", marker_color=REP)
+    fig3.add_bar(x=anios, y=resto_vals, name="Resto del mercado", marker_color="#b0a690")
+    fig3.update_layout(
+        barmode="group", height=260, margin=dict(l=10, r=10, t=10, b=10), showlegend=primero,
+        yaxis_title="Unidades", plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+    )
+    st.plotly_chart(fig3, use_container_width=True, key=f"tendencia_{code}")
+    primero = False
+
+st.markdown(
+    "<div class='callout'><b>Lectura:</b> el volumen de Repaglas crece de forma sostenida en la mayoría de "
+    "códigos hasta 2025 (ej. RE507920: 330→473 unidades/año 2022-2025), con 2026 en camino a un año similar o "
+    "mayor una vez anualizado el dato parcial. El resto del mercado, en cambio, no muestra una tendencia de "
+    "crecimiento consistente en ningún código — se mueve en lotes puntuales año a año, sin la cadencia estable "
+    "de Repaglas. Eso es justamente lo que sostiene el share: no es solo mayor volumen, es volumen más "
+    "predecible.</div>",
     unsafe_allow_html=True,
 )
 

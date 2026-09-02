@@ -332,3 +332,30 @@ def load_alternativas_marca():
             )
         out[oem] = items
     return out
+
+
+# Unidades importadas por año — Repaglas vs. resto del mercado — por OEM, calculado
+# 2026-09-01 desde los mismos 10 reportes ADEX reales (ver docstring del módulo).
+# 2026 es parcial (solo hasta julio, igual que el resto del dashboard).
+_TENDENCIA_ANUAL_RAW = {
+    "RE65966":  {2022: (80, 48),   2023: (164, 4),   2024: (161, 0),   2025: (152, 0),  2026: (100, 4)},
+    "R116383":  {2022: (250, 60),  2023: (190, 0),   2024: (300, 34),  2025: (238, 0),  2026: (132, 0)},
+    "RE536083": {2022: (56, 70),   2023: (72, 44),   2024: (132, 4),   2025: (98, 18),  2026: (64, 0)},
+    "RE500734": {2022: (139, 104), 2023: (93, 36),   2024: (242, 35),  2025: (242, 64), 2026: (130, 64)},
+    "RE66820":  {2022: (1270, 342),2023: (970, 50),  2024: (1170, 382),2025: (1050, 49),2026: (450, 10)},
+    "RE507850": {2022: (150, 160), 2023: (184, 142), 2024: (328, 124), 2025: (402, 146),2026: (232, 40)},
+    "RE501455": {2022: (135, 137), 2023: (105, 21),  2024: (192, 61),  2025: (191, 40), 2026: (115, 9)},
+    "RE504914": {2022: (135, 139), 2023: (96, 165),  2024: (184, 79),  2025: (238, 56), 2026: (166, 36)},
+    "RE507920": {2022: (330, 154), 2023: (252, 160), 2024: (365, 85),  2025: (473, 57), 2026: (256, 24)},
+    "RE48786":  {2022: (380, 682), 2023: (439, 520), 2024: (620, 122), 2025: (592, 91), 2026: (330, 62)},
+}
+
+
+@st.cache_data
+def load_tendencia_anual():
+    """Unidades importadas por año, Repaglas vs. resto del mercado, por OEM (2022-jul.2026,
+    2026 parcial): {oem: {anio: {"repaglas": u, "resto": u}}}."""
+    out = {}
+    for oem, years in _TENDENCIA_ANUAL_RAW.items():
+        out[oem] = {anio: {"repaglas": rep, "resto": resto} for anio, (rep, resto) in years.items()}
+    return out
