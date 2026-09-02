@@ -245,7 +245,7 @@ seleccion_ev = st.multiselect(
 for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
     if sku not in seleccion_ev:
         continue
-    st.markdown(f"**{sku}** ({code}) — {desc} · {n} importadores")
+    st.markdown(f"**{sku}** ({code} · sustitutos: {sustitutos_str(code)}) — {desc} · {n} importadores")
     filas = evolucion.get(code, [])
     st.dataframe(
         {
