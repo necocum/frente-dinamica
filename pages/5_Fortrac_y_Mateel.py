@@ -79,21 +79,33 @@ categorias_motor = [
     ("Filtros: elementos filtrantes de motor", 24362, 57211, 6077),
 ]
 
-paises = [
-    ("Repaglas", 68.8, "Estados Unidos"),
-    ("Fortrac", 80.3, "Estados Unidos"),
-    ("Mateel", 49.0, "Estados Unidos"),
-]
+# FOB mensual 2026 (todo el catálogo, no solo Maxiforce) — para desagregar la barra "2026*" del
+# gráfico anual en 7 barras mensuales.
+mes_2026_rep = [11830, 112411, 59115, 65049, 25029, 74111, 81940]
+mes_2026_for = [229477, 40442, 113449, 14996, 41029, 21742, 29630]
+mes_2026_mat = [0, 8543, 0, 0, 25068, 28691, 2064]
+
+# FOB mensual ene-jul, 2025 vs. 2026, para el comparativo de la Sección 2.
+mes_2025_rep = [5250, 72650, 122297, 90708, 68676, 63003, 37970]
+mes_2025_for = [10256, 80483, 20437, 32899, 20427, 44518, 38986]
+mes_2025_mat = [0, 0, 2427, 0, 0, 0, 0]
+
+# País de origen: top 6 por empresa, % del FOB total 2022-jul.2026.
+paises_rep = [("Estados Unidos", 68.8), ("India", 7.5), ("Turquía", 7.5), ("China", 6.6), ("Reino Unido", 4.7), ("Brasil", 2.7)]
+paises_for = [("Estados Unidos", 80.3), ("Francia", 6.6), ("México", 3.8), ("China", 1.5), ("España", 1.3), ("Alemania", 1.2)]
+paises_mat = [("Estados Unidos", 49.0), ("Turquía", 29.9), ("Alemania", 9.3), ("China", 4.2), ("Italia", 2.6), ("Rep. Checa", 1.1)]
 
 # Importaciones etiquetadas literalmente "MAXIFORCE" en el catálogo COMPLETO de Fortrac/Mateel
 # (no solo dentro de los 10 SKU ancla, a diferencia de la hoja "Competencia Maxiforce") —
 # calculado 2026-09-03 buscando el texto "MAXIFORCE" en los 5 campos de Descripción Comercial
 # del mismo export usado en el resto de esta hoja.
 mx_years = ["2022", "2023", "2024", "2025", "2026*"]
+mx_fob_rep = [399806, 400188, 498663, 533448, 318488]
 mx_fob_for = [2253, 0, 0, 14547, 7844]
 mx_fob_mat = [0, 2962, 12404, 0, 0]
 mx_unid_for = [389, 0, 0, 913, 381]
 mx_unid_mat = [0, 206, 968, 0, 0]
+MX_TOTAL_REP = sum(mx_fob_rep)
 MX_TOTAL_FOR = sum(mx_fob_for)
 MX_TOTAL_MAT = sum(mx_fob_mat)
 MX_UNID_FOR = sum(mx_unid_for)
@@ -134,6 +146,22 @@ mx_precio = [
     ("RE504914", "Bomba de aceite motor", 86.12, 81.01, 18, 79.46, 9, ""),
 ]
 
+# Top 10 categorías (partida arancelaria) de Fortrac por FOB total 2022-jul.2026, con el
+# desglose año a año — para la tabla "qué trae más Fortrac cada año".
+FOR_CAT_AÑOS = ["2022", "2023", "2024", "2025", "2026*"]
+for_categorias_anio = [
+    ("Aros de obturación (retenes)", [51787, 43979, 50164, 63482, 48597]),
+    ("Motores completos (émbolo, >130 KW)", [0, 0, 18999, 11846, 127564]),
+    ("Partes de motor 84.07/84.08", [20545, 26837, 18875, 20678, 16284]),
+    ("Partes de máquinas 84.26/84.29/84.30", [31235, 16410, 14509, 19517, 15630]),
+    ("Bombas (las demás)", [60511, 4305, 5688, 9504, 9308]),
+    ("Filtros: aparatos para filtrar lubricante/carburante", [13349, 15029, 26334, 16328, 7007]),
+    ("Bombas de aceite de motor", [25828, 8668, 12366, 22167, 5458]),
+    ("Cajas de cojinetes s/rodamientos", [11719, 6511, 13671, 21417, 20498]),
+    ("Émbolos (pistones) de motor 84.08", [21279, 13529, 8035, 15090, 8700]),
+    ("Partes de árbol de transmisión (levas/cigüeñal)", [15439, 14118, 8312, 9548, 12558]),
+]
+
 
 def usd(n):
     return f"US$ {n:,.0f}"
@@ -161,6 +189,33 @@ def bar_years_2(cats, f, m, height=280):
         barmode="group", height=height, margin=dict(l=10, r=10, t=10, b=10), showlegend=True,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
         yaxis_tickprefix="$", yaxis_tickformat=",.0f",
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
+
+def bar_month_2y(months, v25, v26, color, height=260):
+    fig = go.Figure()
+    fig.add_bar(x=months, y=v25, name="2025", marker_color="#c7c2b8")
+    fig.add_bar(x=months, y=v26, name="2026", marker_color=color)
+    fig.update_layout(
+        barmode="group", height=height, margin=dict(l=10, r=10, t=30, b=10), showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        yaxis_tickprefix="$", yaxis_tickformat=",.0f",
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
+
+def hbar_pct(paises, color, height=200):
+    fig = go.Figure()
+    fig.add_bar(
+        y=[p[0] for p in paises][::-1], x=[p[1] for p in paises][::-1],
+        orientation="h", marker_color=color, text=[f"{p[1]:.1f}%" for p in paises][::-1], textposition="outside",
+    )
+    fig.update_layout(
+        height=height, margin=dict(l=10, r=30, t=10, b=10), showlegend=False,
+        xaxis=dict(ticksuffix="%", range=[0, 100]),
         plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     )
     return fig
@@ -200,7 +255,12 @@ st.write(
     "dentro de los 10 SKU ancla. Mateel es bastante más chico (11% del FOB de Repaglas), pero su volumen "
     "se disparó en 2026. **2026 es parcial, solo hasta julio**, igual que en el resto del dashboard."
 )
-st.plotly_chart(bar_years_3(years, fob_rep, fob_for, fob_mat), use_container_width=True)
+years_ext = ["2022", "2023", "2024", "2025", "Ene-26", "Feb-26", "Mar-26", "Abr-26", "May-26", "Jun-26", "Jul-26"]
+fob_rep_ext = fob_rep[:4] + mes_2026_rep
+fob_for_ext = fob_for[:4] + mes_2026_for
+fob_mat_ext = fob_mat[:4] + mes_2026_mat
+st.plotly_chart(bar_years_3(years_ext, fob_rep_ext, fob_for_ext, fob_mat_ext), use_container_width=True)
+st.caption("2022-2025 son barras anuales; 2026 se desagrega mes a mes (única data disponible: ene-jul) para ver el detalle del año en curso, no solo el total parcial.")
 st.dataframe(
     {
         "Empresa": ["Repaglas", "Fortrac", "Mateel"],
@@ -232,6 +292,28 @@ st.markdown(
     f"DUA de sellos, mangueras y kits repartidos entre febrero y julio, pero conviene ver un año completo "
     f"antes de leerlo como tendencia consolidada.</div>",
     unsafe_allow_html=True,
+)
+
+st.markdown("#### Mes a mes, ene-jul: 2025 vs. 2026")
+st.write(
+    "Mismo periodo (enero a julio), un año contra el otro, por empresa. La barra clara es 2025, la de color "
+    "es 2026 — así se ve en qué meses específicos está la diferencia, no solo el total acumulado."
+)
+mcol1, mcol2, mcol3 = st.columns(3)
+with mcol1:
+    st.markdown("**Repaglas**")
+    st.plotly_chart(bar_month_2y(MESES_2026, mes_2025_rep, mes_2026_rep, REP), use_container_width=True, key="m2y_rep")
+with mcol2:
+    st.markdown("**Fortrac**")
+    st.plotly_chart(bar_month_2y(MESES_2026, mes_2025_for, mes_2026_for, FOR), use_container_width=True, key="m2y_for")
+with mcol3:
+    st.markdown("**Mateel**")
+    st.plotly_chart(bar_month_2y(MESES_2026, mes_2025_mat, mes_2026_mat, MAT), use_container_width=True, key="m2y_mat")
+st.caption(
+    "Repaglas cae en la mayoría de los meses de 2026 salvo febrero. El pico de Fortrac en enero-2026 "
+    "(US$229K) es el DUA de los 10 motores completos ya explicado arriba; sin ese mes, su patrón mensual es "
+    "más parejo que el de Repaglas. Mateel prácticamente no compró nada en 2025 (solo marzo) — su actividad "
+    "2026 es, en términos relativos, toda nueva."
 )
 
 st.divider()
@@ -267,22 +349,63 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+st.markdown("#### Detalle: qué trae más Fortrac cada año (top 10 categorías)")
+st.write(
+    "Las mismas categorías, pero solo Fortrac y año a año — para ver si el mix cambia con el tiempo, no solo "
+    "el acumulado. Elige un año para reordenar la tabla por lo más relevante de **ese** año; \"Total\" la "
+    "ordena por el acumulado 2022–jul.2026 (vista por defecto)."
+)
+filtro_anio_for = st.selectbox(
+    "Ordenar por", options=["Total 2022-jul.26"] + FOR_CAT_AÑOS, index=0, key="filtro_cat_for",
+)
+if filtro_anio_for == "Total 2022-jul.26":
+    orden_idx = None
+else:
+    orden_idx = FOR_CAT_AÑOS.index(filtro_anio_for)
+filas_cat = [(cat, vals, sum(vals)) for cat, vals in for_categorias_anio]
+if orden_idx is not None:
+    filas_cat.sort(key=lambda x: -x[1][orden_idx])
+else:
+    filas_cat.sort(key=lambda x: -x[2])
+st.dataframe(
+    {
+        "Categoría (partida arancelaria)": [f[0] for f in filas_cat],
+        "2022": [usd(f[1][0]) for f in filas_cat],
+        "2023": [usd(f[1][1]) for f in filas_cat],
+        "2024": [usd(f[1][2]) for f in filas_cat],
+        "2025": [usd(f[1][3]) for f in filas_cat],
+        "2026*": [usd(f[1][4]) for f in filas_cat],
+        "Total": [usd(f[2]) for f in filas_cat],
+    },
+    use_container_width=True, hide_index=True,
+)
+st.caption(
+    "Retenes es la única categoría presente los 5 años sin huecos — la más estable del catálogo de Fortrac. "
+    "Motores completos (>130 KW) pasa de US$0 en 2022-2023 a US$127.6K en 2026, el mayor salto de la tabla, "
+    "pero es importación de motor entero, no repuesto (ver nota de la Sección 2). Filtros y bombas de aceite "
+    "tuvieron su mejor año en 2025 y bajaron en 2026 — vigilar si se recuperan en lo que falta del año."
+)
+
 st.divider()
 
 # ================= SECCIÓN 4: PAÍS DE ORIGEN =================
 st.subheader("País de origen")
 st.write(
-    "Las tres empresas concentran su abastecimiento en Estados Unidos (repuesto genuino/OEM), con Mateel "
-    "algo más diversificado (Turquía es su segundo origen, 30% del FOB) — consistente con un catálogo menos "
-    "atado a la marca John Deere."
+    "Las tres empresas concentran su abastecimiento en Estados Unidos (repuesto genuino/OEM), pero no es lo "
+    "único: Fortrac trae un 6.6% de Francia, Mateel diversifica fuerte hacia Turquía (30% del FOB) y "
+    "Alemania (9.3%) — consistente con un catálogo menos atado a la marca John Deere que el de Fortrac."
 )
-st.dataframe(
-    {
-        "Empresa": [p[0] for p in paises],
-        "% FOB desde Estados Unidos": [f"{p[1]:.1f}%" for p in paises],
-    },
-    use_container_width=True, hide_index=True,
-)
+pcol1, pcol2, pcol3 = st.columns(3)
+with pcol1:
+    st.markdown("**Repaglas**")
+    st.plotly_chart(hbar_pct(paises_rep, REP), use_container_width=True, key="pais_rep")
+with pcol2:
+    st.markdown("**Fortrac**")
+    st.plotly_chart(hbar_pct(paises_for, FOR), use_container_width=True, key="pais_for")
+with pcol3:
+    st.markdown("**Mateel**")
+    st.plotly_chart(hbar_pct(paises_mat, MAT), use_container_width=True, key="pais_mat")
+st.caption("% del FOB total 2022–jul.2026, top 6 países de origen por empresa.")
 
 st.divider()
 
@@ -304,7 +427,37 @@ st.markdown(
     "marca es bastante mayor al reportado hasta ahora.</div>",
     unsafe_allow_html=True,
 )
-st.plotly_chart(bar_years_2(mx_years, mx_fob_for, mx_fob_mat), use_container_width=True)
+st.plotly_chart(bar_years_3(mx_years, mx_fob_rep, mx_fob_for, mx_fob_mat), use_container_width=True)
+st.caption(
+    "Nótese la escala: el eje mezcla el Maxiforce de Repaglas (US$318K-533K/año, prácticamente todo su "
+    "negocio) con el de Fortrac y Mateel (unos pocos miles por año) — a propósito, para que el tamaño "
+    "relativo real quede claro en un solo gráfico."
+)
+
+st.markdown("#### Cuadro año a año — con filtro por año")
+filtro_anio_mx = st.selectbox(
+    "Ver", options=["Todos los años (2022-jul.26)"] + mx_years, index=0, key="filtro_anio_mx",
+)
+if filtro_anio_mx == "Todos los años (2022-jul.26)":
+    st.dataframe(
+        {
+            "Empresa": ["Repaglas", "Fortrac", "Mateel"],
+            "2022": [usd(mx_fob_rep[0]), usd(mx_fob_for[0]), usd(mx_fob_mat[0])],
+            "2023": [usd(mx_fob_rep[1]), usd(mx_fob_for[1]), usd(mx_fob_mat[1])],
+            "2024": [usd(mx_fob_rep[2]), usd(mx_fob_for[2]), usd(mx_fob_mat[2])],
+            "2025": [usd(mx_fob_rep[3]), usd(mx_fob_for[3]), usd(mx_fob_mat[3])],
+            "2026*": [usd(mx_fob_rep[4]), usd(mx_fob_for[4]), usd(mx_fob_mat[4])],
+            "Total": [usd(MX_TOTAL_REP), usd(MX_TOTAL_FOR), usd(MX_TOTAL_MAT)],
+        },
+        use_container_width=True, hide_index=True, key="mx_tabla_todos",
+    )
+else:
+    i = mx_years.index(filtro_anio_mx)
+    mc1, mc2, mc3 = st.columns(3)
+    mc1.metric(f"Repaglas — Maxiforce {filtro_anio_mx}", usd(mx_fob_rep[i]))
+    mc2.metric(f"Fortrac — Maxiforce {filtro_anio_mx}", usd(mx_fob_for[i]), "sin compras" if mx_fob_for[i] == 0 else None)
+    mc3.metric(f"Mateel — Maxiforce {filtro_anio_mx}", usd(mx_fob_mat[i]), "sin compras" if mx_fob_mat[i] == 0 else None)
+st.caption("\"Solo Maxiforce\" = únicamente líneas cuya descripción comercial menciona el texto \"MAXIFORCE\" — no todo el catálogo John Deere/genérico de cada empresa.")
 
 st.markdown("#### Mes a mes en 2026 — ¿el ritmo de los rivales se parece al de Repaglas?")
 st.write(
