@@ -85,6 +85,47 @@ paises = [
     ("Mateel", 49.0, "Estados Unidos"),
 ]
 
+# Importaciones etiquetadas literalmente "MAXIFORCE" en el catálogo COMPLETO de Fortrac/Mateel
+# (no solo dentro de los 10 SKU ancla, a diferencia de la hoja "Competencia Maxiforce") —
+# calculado 2026-09-03 buscando el texto "MAXIFORCE" en los 5 campos de Descripción Comercial
+# del mismo export usado en el resto de esta hoja.
+mx_years = ["2022", "2023", "2024", "2025", "2026*"]
+mx_fob_for = [2253, 0, 0, 14547, 7844]
+mx_fob_mat = [0, 2962, 12404, 0, 0]
+mx_unid_for = [389, 0, 0, 913, 381]
+mx_unid_mat = [0, 206, 968, 0, 0]
+MX_TOTAL_FOR = sum(mx_fob_for)
+MX_TOTAL_MAT = sum(mx_fob_mat)
+MX_UNID_FOR = sum(mx_unid_for)
+MX_UNID_MAT = sum(mx_unid_mat)
+
+# Cada fila = 1 DUA con al menos una línea Maxiforce — "canasta" describe el tipo de compra.
+mx_duas_for = [
+    ("dic-2022", "179869", "Kit completo de reconstrucción: pistones/camisas, cojinetes, juntas, retenes, válvulas — 29 líneas"),
+    ("jul-2025", "107339", "Kit completo: bombas agua/aceite/combustible, camisas, cojinetes, retenes, juntas — 40 líneas"),
+    ("ago-2025", "132784", "Kit completo: bombas, kits pistón/camisa, cojinetes, retenes, juntas — 20 líneas"),
+    ("nov-2025", "194126", "Kit completo: cojinetes, retenes, bombas de agua, kit pistón/camisa, pernos culata — 27 líneas"),
+    ("mar-2026", "36088", "Kit completo: bombas, cojinetes, retenes, kit pistón/camisa, juntas — 22 líneas"),
+    ("jul-2026", "111002", "Kit completo + 1 kit de reparación de motor turbo (US$590) — 35 líneas"),
+]
+mx_duas_mat = [
+    ("jun-2023", "78300", "Kit completo: culata, cojinetes, retenes, bombas, kits de retenes hidráulicos — 19 líneas"),
+    ("ago-2024", "126614", "Kit completo: válvulas, cojinetes, bomba aceite, camisa, kit de juntas O/H — 17 líneas"),
+    ("ago-2024", "130516", "Kit de reparación de motor completo (US$1,254) + cojinetes/válvulas/camisas — 25 líneas"),
+]
+
+# Precio FOB/unidad promedio pagado por Fortrac/Mateel vs. el de Repaglas, SOLO en los códigos
+# ancla donde ambos compraron producto etiquetado Maxiforce (no equivalente/otra marca).
+mx_precio = [
+    # (oem, producto, precio_rep, precio_for, unid_for, precio_mat, unid_mat, nota)
+    ("RE500734", "Bomba de agua motor", 75.63, 75.52, 21, None, 0, ""),
+    ("RE66820", "Jgo. anillos de motor", 12.72, 14.69, 42, 15.24, 46, ""),
+    ("RE507850", "Kit camisa/pistón", 73.59, 78.71, 36, 53.00, 6, "Mateel: kit de retenes hidráulicos, variante más chica — no 100% comparable"),
+    ("RE507920", "Kit camisa/pistón", 75.88, 83.42, 24, 75.37, 16, ""),
+    ("RE501455", "Jgo. empaquetaduras", 80.99, 91.58, 7, 88.75, 5, ""),
+    ("RE504914", "Bomba de aceite motor", 86.12, 81.01, 18, 79.46, 9, ""),
+]
+
 
 def usd(n):
     return f"US$ {n:,.0f}"
@@ -93,6 +134,19 @@ def usd(n):
 def bar_years_3(cats, r, f, m, height=340):
     fig = go.Figure()
     fig.add_bar(x=cats, y=r, name="Repaglas", marker_color=REP)
+    fig.add_bar(x=cats, y=f, name="Fortrac", marker_color=FOR)
+    fig.add_bar(x=cats, y=m, name="Mateel", marker_color=MAT)
+    fig.update_layout(
+        barmode="group", height=height, margin=dict(l=10, r=10, t=10, b=10), showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        yaxis_tickprefix="$", yaxis_tickformat=",.0f",
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
+
+def bar_years_2(cats, f, m, height=280):
+    fig = go.Figure()
     fig.add_bar(x=cats, y=f, name="Fortrac", marker_color=FOR)
     fig.add_bar(x=cats, y=m, name="Mateel", marker_color=MAT)
     fig.update_layout(
@@ -126,7 +180,7 @@ k1, k2, k3, k4 = st.columns(4)
 k1.metric("FOB Fortrac 2022–jul.26", usd(TOTAL_FOR), f"{TOTAL_FOR/TOTAL_REP*100:.0f}% del FOB de Repaglas")
 k2.metric("FOB con marca \"John Deere\" (Fortrac)", "91.1%", "vs. 28.8% en Mateel")
 k3.metric("Crecimiento repuestos, ene-jul 2026", "+46%", "Fortrac, excl. 1 lote de motores · Repaglas: −6.7%")
-k4.metric("Categorías donde Fortrac ya supera a Repaglas", "3 de 12", "retenes y las 2 líneas de filtro")
+k4.metric("¿Compran marca Maxiforce genuina?", "Sí, ambos", "Fortrac: 6 restocks 2022-jul.26 · Mateel: 3, ninguno desde ago-2024")
 
 st.divider()
 
@@ -224,7 +278,115 @@ st.dataframe(
 
 st.divider()
 
-# ================= SECCIÓN 5: SÍNTESIS =================
+# ================= SECCIÓN 5: ¿IMPORTAN MARCA MAXIFORCE? =================
+st.subheader("¿Fortrac y Mateel importan marca Maxiforce genuina? Sí, los 4.5 años")
+st.write(
+    "Buscando el texto **\"MAXIFORCE\"** en las 5 descripciones comerciales de todo el catálogo de ambas "
+    "empresas (no solo dentro de los 10 SKU ancla, como en la hoja \"Competencia Maxiforce\"), aparecen "
+    "**271 líneas**: Fortrac trajo Maxiforce en **6 embarques** entre dic.2022 y jul.2026 (1,683 unidades, "
+    "US$24.6K), y Mateel en **3 embarques** entre jun.2023 y ago.2024 (1,174 unidades, US$15.4K) — y no ha "
+    "vuelto a comprar la marca desde entonces."
+)
+st.markdown(
+    "<div class='callout-op'><b>Esto es más grande de lo que mostraba \"Competencia Maxiforce\".</b> Esa hoja "
+    "solo contaba unidades Maxiforce dentro de los 10 SKU ancla (Fortrac: 148 unidades). Mirando su catálogo "
+    "completo, Fortrac trajo <b>1,683 unidades</b> con esa marca — 11× más — porque la mayoría de sus compras "
+    "Maxiforce son piezas chicas (cojinetes, retenes, juntas, válvulas) que no están entre los 10 códigos "
+    "seguidos, pero forman parte del mismo kit de reconstrucción de motor. El número real de competencia de "
+    "marca es bastante mayor al reportado hasta ahora.</div>",
+    unsafe_allow_html=True,
+)
+st.plotly_chart(bar_years_2(mx_years, mx_fob_for, mx_fob_mat), use_container_width=True)
+
+st.markdown("#### Cadencia de restock — cada embarque es una \"canasta\" de reconstrucción de motor")
+st.write(
+    "No son compras sueltas de una sola pieza: cada DUA junta 17-40 líneas distintas de Maxiforce en el "
+    "mismo envío — pistones, camisas, cojinetes, retenes, juntas, bombas de agua/aceite/combustible, "
+    "válvulas — el perfil de compra de alguien armando **kits completos de reparación de motor**, no de un "
+    "distribuidor reponiendo estantería SKU por SKU."
+)
+st.dataframe(
+    {
+        "Fecha": [d[0] for d in mx_duas_for],
+        "DUA": [d[1] for d in mx_duas_for],
+        "Contenido de la canasta": [d[2] for d in mx_duas_for],
+    },
+    use_container_width=True, hide_index=True, key="mx_duas_for",
+)
+st.caption("Fortrac — 6 embarques. Gap de 2.5 años entre dic-2022 y jul-2025; desde entonces, restock cada 3-4 meses (jul, ago, nov-2025; mar, jul-2026) — ritmo estable, no oportunista.")
+st.dataframe(
+    {
+        "Fecha": [d[0] for d in mx_duas_mat],
+        "DUA": [d[1] for d in mx_duas_mat],
+        "Contenido de la canasta": [d[2] for d in mx_duas_mat],
+    },
+    use_container_width=True, hide_index=True, key="mx_duas_mat",
+)
+st.caption("Mateel — 3 embarques, los 2 últimos el mismo mes (ago-2024). Sin compras de Maxiforce en los 23 meses siguientes (hasta jul-2026, corte de este reporte).")
+
+st.markdown("#### El dato que cambia la estrategia: no ganan por precio")
+st.write(
+    "Comparando el FOB/unidad que pagó cada uno por el **mismo código OEM, misma marca Maxiforce** (no un "
+    "equivalente), contra lo que paga Repaglas en el mismo periodo:"
+)
+st.dataframe(
+    {
+        "SKU (OEM)": [f"{p[0]} — {p[1]}" for p in mx_precio],
+        "FOB/u Repaglas": [f"${p[2]:.2f}" for p in mx_precio],
+        "FOB/u Fortrac": [f"${p[3]:.2f} ({p[4]}u)" for p in mx_precio],
+        "vs. Repaglas": [f"{(p[3]/p[2]-1)*100:+.0f}%" for p in mx_precio],
+        "FOB/u Mateel": [f"${p[5]:.2f} ({p[6]}u)" if p[5] else "— no compró" for p in mx_precio],
+        "vs. Repaglas ": [f"{(p[5]/p[2]-1)*100:+.0f}%" if p[5] else "" for p in mx_precio],
+    },
+    use_container_width=True, hide_index=True,
+)
+st.caption("Mateel en RE507850 compró una variante más chica (kit de retenes hidráulicos, no el kit completo) — el −28% no es comparable 1 a 1, dejado en la tabla por transparencia.")
+st.markdown(
+    "<div class='callout'><b>Fortrac paga IGUAL o MÁS que Repaglas en 5 de 6 códigos comparables</b> "
+    "(de −0.1% a +16%), a pesar de comprar lotes de 7-42 unidades contra los cientos que compra Repaglas. "
+    "Solo en RE504914 paga algo menos (−6%). <b>No hay evidencia de que Fortrac tenga una fuente más barata "
+    "del "
+    "mismo producto</b> — están comprando el mismo catálogo Maxiforce, con el mismo número de parte "
+    "(\"TRE...\"), del mismo país de origen (Estados Unidos), a un costo de fábrica similar o mayor al de "
+    "Repaglas.</div>",
+    unsafe_allow_html=True,
+)
+
+st.markdown("#### Lectura comercial y de cadena de suministro")
+st.markdown(
+    """
+1. **Repaglas no tiene exclusividad de la marca Maxiforce en Perú.** Fortrac y Mateel acceden al mismo
+   catálogo, con el mismo número de parte del fabricante, desde el mismo origen (EE.UU.). Si no existe hoy
+   un acuerdo de distribución exclusiva o territorial con el fabricante/mayorista de Maxiforce, esta es la
+   conversación a abrir — es la palanca de mayor impacto de todo este hallazgo, más allá del tamaño actual
+   de Fortrac o Mateel.
+2. **La ventaja de volumen de Repaglas no se está capturando en precio de compra.** Repaglas compra
+   cientos de unidades por código y paga igual o más que Fortrac, que compra decenas. Eso es una señal para
+   ir al proveedor a negociar un descuento por volumen o rebate anual escalonado — hoy esa escala no está
+   generando ninguna ventaja de costo medible.
+3. **Si Fortrac no gana por costo de compra, su amenaza (si existe) está en el mercado local**: precio de
+   reventa, margen más chico, o servicio/cercanía al taller. Vale la pena un ejercicio de \"comprador
+   fantasma\" sobre el precio de venta de Fortrac en Lima para saber si estos precios de importación
+   similares se traducen en un precio final más barato al cliente (competencia real de precio) o si
+   Fortrac simplemente tiene un margen menor (no es una amenaza de pricing para Repaglas).
+4. **El patrón de compra de Fortrac (kit completo de reconstrucción en cada embarque) sugiere que atiende
+   talleres que hacen overhaul integral de motor**, no una demanda de repuesto suelto. Vale la pena revisar
+   si Repaglas ya vende un \"kit de reparación completa\" empaquetado con el mismo criterio (pistón + camisa
+   + cojinetes + juntas + retenes + bombas en un solo pedido) o si hoy se vende todo por separado — podría
+   ser una oportunidad comercial además de una respuesta competitiva.
+5. **Cadencia a vigilar**: desde que Fortrac retomó la compra de Maxiforce en jul-2025, restockea cada 3-4
+   meses de forma consistente (jul, ago, nov-2025; mar, jul-2026). Con ese ritmo, el siguiente pedido
+   esperado cae entre **octubre y diciembre 2026** — si no llega, es señal de que Fortrac está bajando el
+   pie; si llega antes o más grande, es señal de que está acelerando.
+6. **Mateel no es una amenaza de marca activa hoy.** No compra Maxiforce desde agosto de 2024 (23 meses),
+   pese a que su FOB total (todas las marcas) se disparó en 2026 — ese crecimiento viene de otra parte de su
+   catálogo, no de competir con la línea Maxiforce de Repaglas. Monitorear, no priorizar.
+"""
+)
+
+st.divider()
+
+# ================= SECCIÓN 6: SÍNTESIS =================
 st.subheader("Relectura: Fortrac no es un rival marginal")
 st.markdown(
     """
@@ -241,8 +403,13 @@ st.markdown(
 3. **Filtros de motor, otra vez.** Fortrac ya supera a Repaglas en las dos categorías de filtro — la misma
    brecha identificada con IPESA (pendiente #1 y #2 de la bitácora del proyecto) aparece confirmada en un
    segundo competidor independiente.
-4. **Mateel es un perfil distinto**, más cercano a Dinámica (transmisión, grifería, engranajes) que a
-   Fortrac o IPESA — la señal a vigilar ahí es el salto de volumen 2026, no el solapamiento de catálogo.
+4. **No hay exclusividad de marca ni ventaja de costo de compra** — el hallazgo más importante de esta
+   sección: Fortrac y Mateel compran el mismo Maxiforce genuino, al mismo costo de fábrica o más, que
+   Repaglas. El terreno de competencia real está en el mercado local (precio de reventa, servicio, kits
+   empaquetados), no en quién accede más barato al proveedor.
+5. **Mateel es un perfil distinto**, más cercano a Dinámica (transmisión, grifería, engranajes) que a
+   Fortrac o IPESA — la señal a vigilar ahí es el salto de volumen 2026, no el solapamiento de catálogo, y
+   su compra de Maxiforce está inactiva desde ago-2024.
 """
 )
 
