@@ -255,12 +255,16 @@ st.write(
     "dentro de los 10 SKU ancla. Mateel es bastante más chico (11% del FOB de Repaglas), pero su volumen "
     "se disparó en 2026. **2026 es parcial, solo hasta julio**, igual que en el resto del dashboard."
 )
-years_ext = ["2022", "2023", "2024", "2025", "Ene-26", "Feb-26", "Mar-26", "Abr-26", "May-26", "Jun-26", "Jul-26"]
-fob_rep_ext = fob_rep[:4] + mes_2026_rep
-fob_for_ext = fob_for[:4] + mes_2026_for
-fob_mat_ext = fob_mat[:4] + mes_2026_mat
-st.plotly_chart(bar_years_3(years_ext, fob_rep_ext, fob_for_ext, fob_mat_ext), use_container_width=True)
-st.caption("2022-2025 son barras anuales; 2026 se desagrega mes a mes (única data disponible: ene-jul) para ver el detalle del año en curso, no solo el total parcial.")
+st.plotly_chart(bar_years_3(years, fob_rep, fob_for, fob_mat), use_container_width=True)
+st.caption("2026 (\"2026*\") es un solo total parcial ene-jul — mismo criterio que el resto del dashboard. Su desglose mes a mes está justo abajo, en su propia escala.")
+
+st.markdown("#### 2026 mes a mes (ene-jul) — el detalle detrás de la barra \"2026*\"")
+st.write(
+    "En el gráfico de arriba, la barra 2026 es chica al lado de un año completo — no porque falte data, sino "
+    "porque son 7 meses contra 12. Este gráfico usa su propia escala para que se vea el detalle mes a mes de "
+    "lo que ya pasó este año."
+)
+st.plotly_chart(bar_years_3(MESES_2026, mes_2026_rep, mes_2026_for, mes_2026_mat, height=300), use_container_width=True, key="mes_2026_general")
 st.dataframe(
     {
         "Empresa": ["Repaglas", "Fortrac", "Mateel"],
