@@ -108,6 +108,14 @@ mx_duas_for = [
     ("mar-2026", "36088", "Kit completo: bombas, cojinetes, retenes, kit pistón/camisa, juntas — 22 líneas"),
     ("jul-2026", "111002", "Kit completo + 1 kit de reparación de motor turbo (US$590) — 35 líneas"),
 ]
+MESES_2026 = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul"]
+# FOB Maxiforce mes a mes, ene-jul 2026, calculado con el mismo criterio (texto "MAXIFORCE" en
+# los 5 campos de Descripción Comercial) sobre las TRES empresas — Repaglas incluido, para ver
+# si el ritmo de restock de los rivales coincide con el propio.
+mx_2026_rep = [11830, 78260, 53720, 59585, 25029, 30493, 59572]
+mx_2026_for = [0, 0, 3194, 0, 0, 0, 4651]
+mx_2026_mat = [0, 0, 0, 0, 0, 0, 0]
+
 mx_duas_mat = [
     ("jun-2023", "78300", "Kit completo: culata, cojinetes, retenes, bombas, kits de retenes hidráulicos — 19 líneas"),
     ("ago-2024", "126614", "Kit completo: válvulas, cojinetes, bomba aceite, camisa, kit de juntas O/H — 17 líneas"),
@@ -297,6 +305,31 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.plotly_chart(bar_years_2(mx_years, mx_fob_for, mx_fob_mat), use_container_width=True)
+
+st.markdown("#### Mes a mes en 2026 — ¿el ritmo de los rivales se parece al de Repaglas?")
+st.write(
+    "Repaglas trae Maxiforce **los 7 meses del año** (chico en algunos, grande en otros, pero sin huecos) — "
+    "un flujo de reposición continuo. Fortrac solo tuvo actividad en **2 de los 7 meses** (marzo y julio) y "
+    "Mateel en **ninguno**. No hay coincidencia de calendario con Repaglas (no hay señal de que compren justo "
+    "después o antes de un embarque tuyo) — el ritmo de Fortrac responde a su propio ciclo de reposición de "
+    "kit de taller, no al tuyo."
+)
+st.dataframe(
+    {
+        "Mes (2026)": MESES_2026,
+        "Repaglas": [usd(v) for v in mx_2026_rep],
+        "Fortrac": [usd(v) if v else "—" for v in mx_2026_for],
+        "Mateel": [usd(v) if v else "—" for v in mx_2026_mat],
+    },
+    use_container_width=True, hide_index=True,
+)
+st.caption(
+    f"Total ene-jul 2026: Repaglas {usd(sum(mx_2026_rep))} en 7 embarques distintos (compra Maxiforce "
+    f"prácticamente cada mes) · Fortrac {usd(sum(mx_2026_for))} en 2 embarques (mar y jul) · Mateel {usd(0)}, "
+    f"sin compras. La cadencia mensual no aporta más que confirmar lo que ya dicen las 2 fechas de Fortrac: "
+    f"con solo 2-3 restocks al año en cada rival, un cuadro mes a mes de ellos solos es mayormente ceros — "
+    f"se vuelve útil recién al ponerlo al lado del propio ritmo de Repaglas, como aquí."
+)
 
 st.markdown("#### Cadencia de restock — cada embarque es una \"canasta\" de reconstrucción de motor")
 st.write(
