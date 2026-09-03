@@ -63,6 +63,25 @@ ytd_for = (248007, 490765)
 ytd_mat = (2427, 64366)
 FOR_DUA_MOTORES = 127564  # un solo DUA (31376, ene.2026) de 10 motores JD completos
 
+# Detalle logístico del DUA de los motores + los demás envíos de Fortrac con país "Francia" —
+# investigado 2026-09-03 a pedido del usuario. "País" en ADEX es el país de fabricación
+# declarado, no necesariamente el domicilio del vendedor.
+MOTORES_DETALLE = {
+    "fecha": "19-ene-2026", "dua": "31376", "pais": "Francia", "puerto": "Valencia (España)",
+    "via": "Marítimo", "naviera": "Maersk Line Perú S.A.C.", "agente": "Conexión Aduanas S.A.C.",
+    "almacen": "Almacenes Forwarder S.A.C.",
+    "contenido": "10× motor completo JD 6068TF250 (185HP/138kW, \"bare engine\") + 2× motor "
+                 "compacto 93kW con radiador/ventilador/filtro de aire — 12 líneas, 1 solo DUA",
+}
+FRANCIA_OTROS_TOTAL = 18921
+FRANCIA_OTROS_DUAS = 32
+FRANCIA_OTROS_DESDE = "may-2023"
+FRANCIA_OTROS_HASTA = "jul-2026"
+FRANCIA_OTROS_TOP = [
+    ("Bocina (bushing)", 19), ("Bomba de combustible", 12), ("Válvula de alivio", 5),
+    ("Resorte", 5), ("Válvula de presión", 4), ("Asiento de válvula", 4),
+]
+
 categorias_motor = [
     # (categoría, FOB Repaglas, FOB Fortrac, FOB Mateel)
     ("Émbolos (pistones) motor 84.08", 604659, 66633, 3369),
@@ -295,6 +314,59 @@ st.markdown(
     f"(de US$2,427 a US$64,366) parte de una base casi nula — no viene de un solo lote grande, son varios "
     f"DUA de sellos, mangueras y kits repartidos entre febrero y julio, pero conviene ver un año completo "
     f"antes de leerlo como tendencia consolidada.</div>",
+    unsafe_allow_html=True,
+)
+
+st.markdown("#### ¿De dónde vienen esos motores?")
+st.write(
+    f"El DUA **{MOTORES_DETALLE['dua']}** ({MOTORES_DETALLE['fecha']}) trae {MOTORES_DETALLE['contenido']}. "
+    f"A diferencia de casi todo lo demás que importa Fortrac (Estados Unidos, vía Miami), este envío declara "
+    f"país de origen **{MOTORES_DETALLE['pais']}** y entra por **{MOTORES_DETALLE['puerto']}**, vía "
+    f"{MOTORES_DETALLE['via'].lower()} ({MOTORES_DETALLE['naviera']}), despachado por "
+    f"{MOTORES_DETALLE['agente']} y almacenado en {MOTORES_DETALLE['almacen']}."
+)
+dcol1, dcol2 = st.columns(2)
+with dcol1:
+    st.markdown(
+        f"""
+- **Fecha de ingreso:** {MOTORES_DETALLE['fecha']}
+- **DUA:** {MOTORES_DETALLE['dua']}
+- **País de origen declarado:** {MOTORES_DETALLE['pais']}
+- **Puerto:** {MOTORES_DETALLE['puerto']}
+- **Vía:** {MOTORES_DETALLE['via']}
+"""
+    )
+with dcol2:
+    st.markdown(
+        f"""
+- **Naviera:** {MOTORES_DETALLE['naviera']}
+- **Agente de aduana:** {MOTORES_DETALLE['agente']}
+- **Almacén:** {MOTORES_DETALLE['almacen']}
+- **FOB del embarque:** {usd(FOR_DUA_MOTORES)}
+"""
+    )
+st.markdown(
+    "<div class='callout'><b>¿Se compra directo de la planta de John Deere? No hay evidencia de eso, y es "
+    "poco probable.</b> \"País\" en ADEX es el país de <b>fabricación</b> declarado (aquí, probablemente la "
+    "planta de motores John Deere en Saran, Francia — la principal de la marca para PowerTech en "
+    "Europa/LatAm), no el domicilio de quien le vendió el motor a Fortrac. Lo más plausible es que haya "
+    "comprado a un <b>distribuidor o dealer autorizado de John Deere</b> (posiblemente en EE.UU., por el "
+    "patrón del resto de sus compras) que revende repuestos y motores genuinos de fábrica — no una compra "
+    "directa a Deere. Y en volumen, es chico: 10 motores es un pedido puntual, no una línea de abastecimiento "
+    "recurrente — es la única vez que Fortrac trae motores completos en los 4.5 años de este reporte.</div>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    f"<div class='callout-op'><b>Pero \"Francia\" como origen no es solo el motor.</b> Fortrac tiene, aparte "
+    f"de este DUA, <b>{FRANCIA_OTROS_DUAS} embarques más</b> con el mismo país de origen declarado, por "
+    f"{usd(FRANCIA_OTROS_TOTAL)} en total — desde <b>{FRANCIA_OTROS_DESDE}</b> hasta {FRANCIA_OTROS_HASTA}, "
+    f"casi uno por mes, todos chicos (US$17 a US$2,679 por DUA) y <b>todos vía Miami</b> (no Valencia). Son "
+    f"repuestos sueltos de motor con marca John Deere genuina — no Maxiforce —, principalmente "
+    + ", ".join(f"{n.lower()} ({c}×)" for n, c in FRANCIA_OTROS_TOP)
+    + f". Esto confirma que Fortrac tiene un <b>segundo canal genuino en paralelo al de Maxiforce</b>: un "
+    "goteo constante de repuestos John Deere originales, más antiguo que su relación con Maxiforce (arrancó "
+    "en mayo-2023, 8 meses antes del primer restock Maxiforce detectado) — el lote de motores de enero-2026 "
+    "es la excepción grande dentro de un patrón que, en general, es de compras chicas y frecuentes.</div>",
     unsafe_allow_html=True,
 )
 
