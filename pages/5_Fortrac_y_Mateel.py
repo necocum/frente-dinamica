@@ -82,6 +82,28 @@ FRANCIA_OTROS_TOP = [
     ("Resorte", 5), ("Válvula de presión", 4), ("Asiento de válvula", 4),
 ]
 
+# Ficha técnica de los 2 modelos de motor del DUA 31376 — extraída línea a línea del reporte,
+# incluye N° de serie declarado en la Descripción Comercial 5 de cada línea.
+MOTORES_MODELOS = [
+    {
+        "modelo": "John Deere PowerTech 6068TF250", "unidades": 10,
+        "potencia": "185 HP @ 2,400 RPM / 138 kW @ 2,400 RPM",
+        "familia": "6068 — 6 cilindros, 6.8L diésel",
+        "presentacion": "\"Bare engine\" (bloque completo, sin radiador/accesorios)",
+        "peso_kg": 640, "fob_u": 10959.28, "cif_u": 11335.20,
+        "series": ["CD6068C122224", "225", "226", "227", "228", "229", "230", "231", "232", "233"],
+    },
+    {
+        "modelo": "John Deere PowerTech 4045 (completo)", "unidades": 2,
+        "potencia": "93 kW @ 2,400 RPM, SAE3",
+        "familia": "4045 — 4 cilindros, la línea PowerTech más chica de JD",
+        "presentacion": "Completo: radiador 11.5\", ventilador, soplante 12V, filtro de aire, pintado verde JD",
+        "peso_kg": 525, "fob_u": 8985.60, "cif_u": 9293.82,
+        "series": ["CD4045C121922", "121923"],
+    },
+]
+PARTIDA_MOTORES = "8408.90.20.00 — motores de émbolo (pistón) de potencia superior a 130 kW (174 HP)"
+
 categorias_motor = [
     # (categoría, FOB Repaglas, FOB Fortrac, FOB Mateel)
     ("Émbolos (pistones) motor 84.08", 604659, 66633, 3369),
@@ -345,6 +367,39 @@ with dcol2:
 - **FOB del embarque:** {usd(FOR_DUA_MOTORES)}
 """
     )
+
+st.markdown("##### Ficha técnica de los 2 modelos")
+st.caption(f"Partida arancelaria: {PARTIDA_MOTORES}")
+st.dataframe(
+    {
+        "Modelo": [m["modelo"] for m in MOTORES_MODELOS],
+        "Unidades": [m["unidades"] for m in MOTORES_MODELOS],
+        "Potencia": [m["potencia"] for m in MOTORES_MODELOS],
+        "Familia": [m["familia"] for m in MOTORES_MODELOS],
+        "Presentación": [m["presentacion"] for m in MOTORES_MODELOS],
+        "Peso/u": [f"{m['peso_kg']} kg" for m in MOTORES_MODELOS],
+        "FOB/u": [f"${m['fob_u']:,.2f}" for m in MOTORES_MODELOS],
+        "CIF/u": [f"${m['cif_u']:,.2f}" for m in MOTORES_MODELOS],
+    },
+    use_container_width=True, hide_index=True,
+)
+st.markdown("**N° de serie declarado por unidad** (Descripción Comercial 5 de cada línea del DUA):")
+scol1, scol2 = st.columns(2)
+with scol1:
+    st.write(f"6068TF250 (10u): {', '.join(MOTORES_MODELOS[0]['series'])}")
+with scol2:
+    st.write(f"4045 completo (2u): {', '.join(MOTORES_MODELOS[1]['series'])}")
+st.markdown(
+    "<div class='callout-op'><b>Los números de serie son casi correlativos</b> (…224 al …233 en el 6068; "
+    "…922-923 en el 4045) y el <b>FOB/kg es prácticamente idéntico entre ambos modelos</b> "
+    "(≈US$17.12/kg, sin importar la potencia) — dos señales de que salieron del mismo lote de producción o "
+    "remanufactura con una lista de precios estándar, no de motores usados sueltos comprados uno por uno. "
+    "Encaja con el perfil de un <b>motor remanufacturado de fábrica (\"JD Reman\")</b>, un programa que John "
+    "Deere sí vende a través de distribuidores a talleres y revendedores independientes fuera de su red "
+    "oficial de dealers — no motores piratas ni de segunda mano al azar.</div>",
+    unsafe_allow_html=True,
+)
+
 st.markdown(
     "<div class='callout'><b>¿Se compra directo de la planta de John Deere? No hay evidencia de eso, y es "
     "poco probable.</b> \"País\" en ADEX es el país de <b>fabricación</b> declarado (aquí, probablemente la "
