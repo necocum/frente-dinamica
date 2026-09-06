@@ -111,6 +111,19 @@ def bar_years(categories, values, color, height=280):
     return fig
 
 
+def pct_codigo_chart(years_, ipesa_pct, repaglas_pct, height=320):
+    fig = go.Figure()
+    fig.add_bar(name="IPESA", x=years_, y=ipesa_pct, marker_color=IPE)
+    fig.add_bar(name="Repaglas", x=years_, y=repaglas_pct, marker_color=REP)
+    fig.update_layout(
+        height=height, margin=dict(l=10, r=10, t=10, b=10), barmode="group",
+        yaxis_ticksuffix="%", yaxis_range=[0, 100],
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
+
 # ================= HEADER =================
 st.markdown("###### 🏭 INTELIGENCIA COMERCIAL · ADUANAS DEL PERÚ (ADEX DATA TRADE)")
 st.title("IPESA — repuestos de motor")
@@ -130,6 +143,59 @@ k1.metric("Repuestos IPESA 2022–jul.26", "US$120.6M", "excl. maquinaria comple
 k2.metric("Filtros de motor", "US$24.4M", "8421.23 + 8421.31 + 8421.99 + 8421.29")
 k3.metric("FOB repuestos con marca John Deere", "57.5%", "US$69.3M de US$120.6M")
 k4.metric("Crecimiento filtros 2022→2026e", "+56%", "US$4.42M → US$6.9M anualizado")
+
+st.divider()
+
+# ================= AVISO: IPESA DEJÓ DE DECLARAR CÓDIGOS =================
+st.subheader("⚠️ Aviso: desde 2024, IPESA casi dejó de declarar el código de parte en Aduanas")
+st.write(
+    "Cualquier análisis de este dashboard que busca **códigos de parte específicos** (OEM/John Deere) dentro de "
+    "las importaciones de IPESA — incluyendo el cruce contra el catálogo Maxiforce — depende de que IPESA escriba "
+    "ese código en la Descripción Comercial de su declaración de Aduanas. **Eso dejó de pasar de forma masiva a "
+    "partir de 2024.**"
+)
+
+anios_codigo = ["2022", "2023", "2024", "2025", "2026"]
+ipesa_pct_codigo = [86.6, 87.3, 19.7, 9.1, 3.9]
+repaglas_pct_codigo = [84.0, 83.9, 78.3, 84.5, 83.8]
+
+cc1, cc2 = st.columns([3, 2])
+with cc1:
+    st.plotly_chart(
+        pct_codigo_chart(anios_codigo, ipesa_pct_codigo, repaglas_pct_codigo),
+        use_container_width=True,
+    )
+    st.caption(
+        "% de líneas de importación que mencionan \"John Deere\" y además traen un código de parte identificable "
+        "(patrón alfanumérico tipo RE12345, R123456, DZ111138, etc.) en alguno de los 5 campos de Descripción "
+        "Comercial, por año, 2022–jul.2026 (2026 parcial, solo hasta julio)."
+    )
+with cc2:
+    st.metric("IPESA con código, 2022", "86.6%")
+    st.metric("IPESA con código, 2026", "3.9%", "-82.7 pp", delta_color="inverse")
+    st.metric("Repaglas con código, 2022→2026", "84.0% → 83.8%", "sin caída")
+
+st.markdown(
+    "<div class='callout'><b>No es un cambio de formato de ADEX — es un comportamiento específico de IPESA.</b> "
+    "Se comparó contra el historial propio de Repaglas en el mismo periodo: Repaglas mantiene entre 78% y 85% de "
+    "sus líneas con código de parte identificable <b>todos los años, sin caída</b>. Si el cambio fuera de ADEX o "
+    "de SUNAT, afectaría a ambas empresas por igual. Como solo le pasa a IPESA, y justo a partir de 2024, la "
+    "lectura más razonable es que es deliberado: una forma común de que un importador dificulte que la "
+    "competencia (como Repaglas, mirando estos mismos reportes) reconstruya su lista de partes desde Aduanas. "
+    "Antes del cambio, una línea típica decía <code>ARANDELA DE EMPUJE, JOHN DEERE, S/M | RE527834</code>; ahora "
+    "dice <code>ARANDELA DE EMPUJE, JOHN DEERE, S/M | DIFERIDO A 49 DIAS FACTURA</code> — mismo repuesto, mismo "
+    "formato, pero donde antes iba el código ahora va la condición de pago.</div>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    "<div class='callout-op'><b>Consecuencia práctica.</b> Todo hallazgo de este dashboard basado en \"qué código "
+    "específico importa IPESA\" (los 15 códigos de filtro de más abajo, y el cruce completo contra el catálogo "
+    "Maxiforce) está sesgado hacia evidencia de <b>2022-2023</b> — no porque IPESA haya dejado de traer esas "
+    "piezas, sino porque desde 2024 ya no es visible en ADEX qué código trae. La oportunidad real hoy es, con "
+    "toda probabilidad, <b>mayor</b> a lo que estos números muestran: son un piso confirmado, no el techo. Para "
+    "ver qué trae IPESA hoy código por código haría falta otra fuente — ADEX ya no alcanza para eso.</div>",
+    unsafe_allow_html=True,
+)
 
 st.divider()
 
@@ -258,5 +324,7 @@ with c2:
         "estandarización, así que el conteo de \"John Deere\" subestima el verdadero share si algún despachador "
         "omite la marca. El nivel de aplicación (tractor/modelo específico) no está disponible en ADEX para la "
         "mayoría de líneas de filtro. El cruce contra catálogo Bsale es por coincidencia de texto de código, no "
-        "por match garantizado de especificación técnica."
+        "por match garantizado de especificación técnica. **Desde 2024, IPESA casi dejó de declarar el código de "
+        "parte** (ver aviso arriba) — cualquier hallazgo por código específico está sesgado hacia 2022-2023 y es "
+        "un piso, no el techo, de la oportunidad real."
     )
