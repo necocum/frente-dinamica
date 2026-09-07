@@ -11,6 +11,8 @@ Comercial, con el problema de ocultamiento de código de IPESA desde 2024 ya
 documentado ahí — este cruce hereda esa misma limitación).
 """
 
+import io
+
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
@@ -92,6 +94,54 @@ top_faltantes_4045 = [
     ("TDZ111135", "Distribuidor", "Inyección", 7786, 26, 6, "2022-2023", "—"),
     ("TRE507852", "Juego segmentos de pistón", "Anillos", 7170, 331, 8, "2022-2024", "KMP (stock=4)"),
     ("TRE502079", "Bujía de precalentamiento", "Otros", 5187, 104, 12, "2022-2023", "—"),
+]
+
+# Detalle completo de los 35 códigos 4045 que no traemos, con evidencia de import IPESA,
+# recalculado directo de "Catalogo_Maxiforce_Oportunidades_20260906.xlsx" (hoja "JD - Nuevos
+# con demanda", filtrada a Engine Model que contiene "4045"). Nota: esta recomputación da 35
+# códigos / US$271,559 — ligeramente distinto de los "44 / US$290,165" citados en los callouts
+# de arriba, que vinieron de un script de sesión anterior no conservado; se deja este set de 35
+# como el reproducible/auditable (cada fila se puede rastrear al Excel fuente).
+# Cruce de "¿ya existe en otra marca?" contra el stock Bsale completo (07-09-2026) y venta de
+# ese SKU alterno en los últimos 6 meses (08-mar-2026 a 07-sep-2026) contra el detalle de ventas
+# 2026 de Bsale — hecho el 2026-09-07.
+faltantes_4045_completo = [
+    # SKU, Producto, Unid. IPESA, FOB US$, N° embarques, Primer año, Último año, Alternativa en otra marca, Venta 6M alt (S/), Unid. 6M alt
+    ("TDZ100217", "Kit de boquillas (inyección)", 213, 85896, 12, 2022, 2024, "Fujian — DZ100217-FIP (stock 0)", 0, 0),
+    ("TRE507959", "Bomba de agua", 16, 32470, 9, 2022, 2024, "—", 0, 0),
+    ("TRE568070", "Bomba de inyección", 23, 29305, 5, 2022, 2023, "OPEX JD — RE.518166-RE568070 (stock 0)", 0, 0),
+    ("TRE71550", "Turbocompresor", 32, 29030, 11, 2022, 2024, "—", 0, 0),
+    ("TDZ100216", "Kit de boquillas (inyección)", 87, 27647, 9, 2022, 2024, "—", 0, 0),
+    ("TDZ100211", "Kit de boquillas (inyección)", 28, 13552, 3, 2022, 2022, "Fujian — DZ100211-FIP (stock 0)", 0, 0),
+    ("TDZ111137", "Distribuidor", 31, 12007, 10, 2022, 2024, "—", 0, 0),
+    ("TDZ111135", "Distribuidor", 26, 7786, 6, 2022, 2023, "—", 0, 0),
+    ("TRE507852", "Juego segmentos de pistón", 331, 7170, 8, 2022, 2024, "KMP — RE507852 (stock 4) + OPEX JD — RE507852JD (stock 0)", 7372, 78),
+    ("TRE508932", "Engranaje", 13, 3784, 6, 2022, 2023, "—", 0, 0),
+    ("TRE548726", "Turbocompresor", 3, 3670, 3, 2022, 2025, "—", 0, 0),
+    ("TRE543935", "Manguito", 337, 2907, 8, 2022, 2023, "Anhui Ebang — RE543935-REP (stock 0)", 3163, 52),
+    ("TDZ100214", "Kit de boquillas (inyección)", 6, 2732, 1, 2022, 2022, "—", 0, 0),
+    ("TDZ100553", "Termostato", 146, 2613, 12, 2022, 2024, "—", 0, 0),
+    ("TRE56369", "Engranaje", 9, 1673, 4, 2022, 2023, "—", 0, 0),
+    ("TDZ100212", "Kit de boquillas (inyección)", 3, 1421, 1, 2022, 2022, "Fujian — DZ100212-FIP (stock 0)", 0, 0),
+    ("TRE506261", "Turbocompresor", 1, 1072, 1, 2023, 2023, "—", 0, 0),
+    ("TR535005", "Tornillo", 406, 931, 13, 2022, 2024, "—", 0, 0),
+    ("TR120638", "Engranaje", 11, 883, 3, 2022, 2022, "—", 0, 0),
+    ("TR521525", "Junta", 31, 822, 5, 2022, 2024, "—", 0, 0),
+    ("TR132267", "Engranaje", 2, 670, 2, 2022, 2023, "—", 0, 0),
+    ("TRE532842", "Juego de juntas", 4, 668, 4, 2023, 2024, "—", 0, 0),
+    ("TR545884", "Junta", 24, 472, 7, 2022, 2023, "—", 0, 0),
+    ("TR120631", "Engranaje", 4, 441, 1, 2022, 2022, "—", 0, 0),
+    ("TRE528652", "Termostato", 34, 363, 3, 2022, 2022, "—", 0, 0),
+    ("TR501130", "Tapadera", 3, 343, 1, 2024, 2024, "—", 0, 0),
+    ("TAL110621", "Tensor", 3, 330, 3, 2023, 2024, "—", 0, 0),
+    ("TR545883", "Junta", 12, 252, 2, 2023, 2023, "—", 0, 0),
+    ("TRE538289", "Termostato", 13, 204, 1, 2022, 2022, "—", 0, 0),
+    ("TR544294", "Empaquetadura", 12, 156, 1, 2022, 2022, "—", 0, 0),
+    ("TR92352", "Empaquetadura", 102, 150, 9, 2022, 2023, "—", 0, 0),
+    ("TR534978", "Retenedor", 176, 40, 3, 2022, 2023, "OPEX JD — R534978 (stock 0)", 0, 0),
+    ("TR121634", "Carcasa", 2, 38, 2, 2023, 2024, "—", 0, 0),
+    ("TR524498", "Junta", 1, 36, 1, 2023, 2023, "—", 0, 0),
+    ("TRE554015", "Termostato", 1, 26, 1, 2023, 2023, "—", 0, 0),
 ]
 
 cat_6068 = [("Kits camisa/pistón/anillos", 18), ("Inyección", 11), ("Empaques/juntas", 10), ("Bomba de agua", 10), ("Válvulas y asientos", 5)]
@@ -251,6 +301,69 @@ st.markdown(
     "126 códigos) — las 2 categorías donde ya vendes más fuerte.</div>",
     unsafe_allow_html=True,
 )
+
+st.markdown("#### 📥 Detalle completo y exportable — los 35 códigos 4045 que no traes, con evidencia IPESA")
+st.caption(
+    "Nota: esta tabla recalculada directo del Excel fuente da **35 códigos / US$271,559** — ligeramente distinto "
+    "de los \"44 / US$290,165\" citados arriba, que salieron de un script de una sesión anterior que no se "
+    "conservó. Se deja esta versión de 35 porque cada fila es rastreable a `Catalogo_Maxiforce_Oportunidades_"
+    "20260906.xlsx`. Las columnas de la derecha son nuevas: cruzan cada código contra el stock Bsale completo "
+    "(todas las marcas, no solo Maxiforce) y contra la venta real de esa marca alterna en los últimos 6 meses "
+    "(08-mar-2026 a 07-sep-2026)."
+)
+st.dataframe(
+    {
+        "SKU sugerido": [f[0] for f in faltantes_4045_completo],
+        "Producto": [f[1] for f in faltantes_4045_completo],
+        "Unidades IPESA": [f[2] for f in faltantes_4045_completo],
+        "FOB IPESA acum.": [usd(f[3]) for f in faltantes_4045_completo],
+        "N° embarques": [f[4] for f in faltantes_4045_completo],
+        "Años con evidencia": [f"{f[5]}-{f[6]}" if f[5] != f[6] else str(f[5]) for f in faltantes_4045_completo],
+        "¿Ya existe en otra marca?": [f[7] for f in faltantes_4045_completo],
+        "Venta 6M de esa marca (S/)": [sr(f[8]) if f[8] else "—" for f in faltantes_4045_completo],
+        "Unid. 6M de esa marca": [str(f[9]) if f[9] else "—" for f in faltantes_4045_completo],
+    },
+    use_container_width=True, hide_index=True, height=420,
+)
+
+n_alt = sum(1 for f in faltantes_4045_completo if f[7] != "—")
+n_alt_con_venta = sum(1 for f in faltantes_4045_completo if f[8] > 0)
+venta6m_total = sum(f[8] for f in faltantes_4045_completo)
+unid6m_total = sum(f[9] for f in faltantes_4045_completo)
+st.markdown(
+    f"<div class='callout'><b>Venta en otra marca de lo que no traes en Maxiforce (últimos 6 meses):</b> de los "
+    f"35 códigos, <b>{n_alt} ya tienen un SKU equivalente abierto en otra marca</b> (Fujian, OPEX JD, KMP, Anhui "
+    f"Ebang) — pero solo <b>{n_alt_con_venta} de esos {n_alt} tuvieron venta real en los últimos 6 meses</b>: "
+    f"TRE507852 (KMP + OPEX JD combinados, S/7,372, 78 unidades) y TRE543935 (Anhui Ebang, S/3,163, 52 unidades). "
+    f"Total: <b>{sr(venta6m_total)} en {unid6m_total} unidades</b>. Los otros {n_alt - n_alt_con_venta} SKU "
+    "alternos existen en catálogo pero no vendieron nada en el semestre, y los 27 códigos restantes no tienen "
+    "ningún sustituto abierto en ninguna marca — no hay nada cubriendo ese hueco hoy, en ninguna marca.</div>",
+    unsafe_allow_html=True,
+)
+
+xlsx_buf_4045 = io.BytesIO()
+try:
+    from openpyxl import Workbook
+
+    wb4045 = Workbook()
+    ws4045 = wb4045.active
+    ws4045.title = "4045 - No traemos (IPESA)"
+    ws4045.append([
+        "SKU sugerido (Maxiforce)", "Producto (según IPESA)", "Unidades IPESA", "FOB US$ IPESA acumulado",
+        "N° embarques IPESA", "Primer año", "Último año", "¿Ya existe en otra marca?",
+        "Venta últimos 6M de esa marca (S/)", "Unidades últimos 6M de esa marca",
+    ])
+    for f in faltantes_4045_completo:
+        ws4045.append(list(f))
+    wb4045.save(xlsx_buf_4045)
+    st.download_button(
+        "⬇️ Descargar Excel — Motor 4045, códigos que no traemos y sí trae IPESA",
+        data=xlsx_buf_4045.getvalue(),
+        file_name="4045_no_traemos_vs_ipesa_maxiforce.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+except ImportError:
+    st.caption("(Descarga a Excel no disponible: falta la librería `openpyxl` en el entorno.)")
 
 st.divider()
 
