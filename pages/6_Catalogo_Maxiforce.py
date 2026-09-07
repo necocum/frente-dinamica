@@ -12,6 +12,7 @@ documentado ahí — este cruce hereda esa misma limitación).
 """
 
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import streamlit as st
 
 REP = "#1f6feb"
@@ -80,16 +81,17 @@ top_actuales_4045 = [
 ]
 
 top_faltantes_4045 = [
-    ("TDZ100217", "Kit de boquillas (inyección)", "Inyección", 85896, 213, 12),
-    ("TRE507959", "Bomba", "Bomba de agua", 32470, 16, 9),
-    ("TRE568070", "Bomba de inyección", "Inyección", 29305, 23, 5),
-    ("TRE71550",  "Turbocompresor", "Turbo", 29030, 32, 11),
-    ("TDZ100216", "Kit de boquillas (inyección)", "Inyección", 27647, 87, 9),
-    ("TDZ100211", "Kit de boquillas (inyección)", "Inyección", 13552, 28, 3),
-    ("TDZ111137", "Distribuidor", "Inyección", 12007, 31, 10),
-    ("TDZ111135", "Distribuidor", "Inyección", 7786, 26, 6),
-    ("TRE507852", "Juego segmentos de pistón", "Anillos", 7170, 331, 8),
-    ("TRE502079", "Bujía de precalentamiento", "Otros", 5187, 104, 12),
+    # SKU, producto, categoría, FOB, unid, embarques, años con evidencia, ¿ya en otra marca?
+    ("TDZ100217", "Kit de boquillas (inyección)", "Inyección", 85896, 213, 12, "2022-2024", "Fujian (stock=0)"),
+    ("TRE507959", "Bomba", "Bomba de agua", 32470, 16, 9, "2022-2024", "—"),
+    ("TRE568070", "Bomba de inyección", "Inyección", 29305, 23, 5, "2022-2023", "OPEX JD (stock=0)"),
+    ("TRE71550",  "Turbocompresor", "Turbo", 29030, 32, 11, "2022-2024", "—"),
+    ("TDZ100216", "Kit de boquillas (inyección)", "Inyección", 27647, 87, 9, "2022-2024", "—"),
+    ("TDZ100211", "Kit de boquillas (inyección)", "Inyección", 13552, 28, 3, "2022", "Fujian (stock=0)"),
+    ("TDZ111137", "Distribuidor", "Inyección", 12007, 31, 10, "2022-2024", "—"),
+    ("TDZ111135", "Distribuidor", "Inyección", 7786, 26, 6, "2022-2023", "—"),
+    ("TRE507852", "Juego segmentos de pistón", "Anillos", 7170, 331, 8, "2022-2024", "KMP (stock=4)"),
+    ("TRE502079", "Bujía de precalentamiento", "Otros", 5187, 104, 12, "2022-2023", "—"),
 ]
 
 cat_6068 = [("Kits camisa/pistón/anillos", 18), ("Inyección", 11), ("Empaques/juntas", 10), ("Bomba de agua", 10), ("Válvulas y asientos", 5)]
@@ -121,17 +123,21 @@ def grouped_hbar(categories, serie1, serie2, name1, name2, color1, color2, heigh
 
 
 def motor_overview_chart():
+    """Un mini-gráfico por motor (escala propia) — un solo gráfico compartido aplasta
+    al 4045 (199 SKU) contra motores con 0-36 SKU y no se puede leer nada."""
     motores = [m[0] for m in resumen_motores]
-    actuales = [m[1] for m in resumen_motores]
-    faltan = [m[4] for m in resumen_motores]
-    fig = go.Figure()
-    fig.add_bar(name="SKU que ya traes", x=motores, y=actuales, marker_color=REP)
-    fig.add_bar(name="SKU que faltan (catálogo Maxiforce)", x=motores, y=faltan, marker_color=BAD)
+    fig = make_subplots(rows=1, cols=len(motores), subplot_titles=[f"Motor {m}" for m in motores])
+    for i, (motor, actuales, venta26, venta25, faltan, con_dem, fob_dem) in enumerate(resumen_motores):
+        fig.add_bar(
+            x=["Ya traes", "Falta"], y=[actuales, faltan],
+            marker_color=[REP, BAD], showlegend=False, text=[actuales, faltan],
+            textposition="outside", row=1, col=i + 1,
+        )
     fig.update_layout(
-        height=340, margin=dict(l=10, r=10, t=10, b=10), barmode="group",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        height=320, margin=dict(l=10, r=10, t=40, b=10),
         plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     )
+    fig.update_yaxes(showticklabels=False)
     return fig
 
 
@@ -152,8 +158,13 @@ st.caption(
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("SKU John Deere ya abiertos (5 motores)", "267")
 k2.metric("Códigos del catálogo sin abrir (5 motores)", "329")
-k3.metric("De esos, con demanda ya confirmada (IPESA)", "75", "US$ 362K acumulado")
+k3.metric("Con evidencia histórica de import (IPESA)", "75", "US$ 362K · 2022-2024, ver aviso")
 k4.metric("Venta 2026 de estos 5 motores (Ene-Ago)", sr(1490448 + 82965 + 97302))
+st.caption(
+    "⚠️ La \"evidencia de import\" viene de IPESA 2022-jul.2026, pero IPESA casi dejó de declarar el código de "
+    "parte desde 2024 (ver hoja \"IPESA\") — 127 de los 136 códigos validados en todo este análisis tienen su "
+    "última evidencia en 2022-2024, ninguna en 2025-2026. Es un piso histórico, no una medición de demanda actual."
+)
 
 st.divider()
 
@@ -206,26 +217,38 @@ with n1c2:
         use_container_width=True, hide_index=True, height=320,
     )
 
-st.markdown("#### Top 10 códigos que faltan, con demanda ya confirmada por IPESA (no es especulación)")
+st.markdown("#### Top 10 códigos que faltan, con evidencia de import real (IPESA) — no es especulación")
 st.dataframe(
     {
         "SKU sugerido": [t[0] for t in top_faltantes_4045],
         "Producto": [t[1] for t in top_faltantes_4045],
         "Categoría": [t[2] for t in top_faltantes_4045],
-        "FOB IPESA (2022-jul.26)": [usd(t[3]) for t in top_faltantes_4045],
+        "FOB IPESA acumulado": [usd(t[3]) for t in top_faltantes_4045],
         "Unidades IPESA": [t[4] for t in top_faltantes_4045],
         "N° embarques": [t[5] for t in top_faltantes_4045],
+        "Años con evidencia": [t[6] for t in top_faltantes_4045],
+        "¿Ya existe en otra marca?": [t[7] for t in top_faltantes_4045],
     },
     use_container_width=True, hide_index=True,
 )
 st.markdown(
-    "<div class='callout-n1'><b>Por qué es la apuesta de menor riesgo:</b> mismo motor, mismo cliente, mismo "
-    "proveedor (Maxiforce/EE.UU., el mismo canal de compra que ya usas). De los 126 códigos que faltan en el "
-    "4045, <b>44 ya tienen demanda real confirmada</b> — alguien en Perú (IPESA) los está importando, no es una "
-    "apuesta a ciegas. Los 3 más grandes son <b>kits de boquillas de inyección</b> (US$85,896 + US$27,647 + "
-    "US$13,552 = US$127K solo en esa sub-categoría) y un <b>turbocompresor</b> (US$29,030) — categoría que hoy "
-    "tienes en <b>cero</b> SKU en este motor. Inyección y kits camisa/pistón/anillos son, juntos, el 40% de todo "
-    "el hueco (50 de 126 códigos) — y son exactamente las 2 categorías donde ya vendes más fuerte.</div>",
+    "<div class='callout'><b>⚠️ Ojo con la vigencia de este número — pregunta natural en la reunión.</b> "
+    "IPESA prácticamente dejó de escribir el código de parte en su declaración de Aduanas desde 2024 (ver hoja "
+    "\"IPESA\" de este dashboard: 86.6% de líneas con código en 2022 → 3.9% en 2026). Por eso <b>127 de los 136 "
+    "códigos validados en todo este análisis tienen evidencia SOLO entre 2022 y 2024</b> — de los 10 de la tabla, "
+    "ninguno tiene una sola línea en 2025 o 2026. Esto no significa que la demanda haya desaparecido: significa "
+    "que ya no podemos verla en Aduanas. El número es un <b>piso confirmado con data vieja, no una medición de "
+    "demanda actual</b> — trátalo como \"esto se compraba hace 2-3 años\", no \"esto se compra hoy\".</div>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    "<div class='callout-n1'><b>Por qué sigue siendo la apuesta de menor riesgo, con esa salvedad:</b> mismo "
+    "motor, mismo cliente, mismo proveedor (Maxiforce/EE.UU., el canal que ya usas hoy). De los 126 códigos que "
+    "faltan en el 4045, 44 tienen esta evidencia histórica — y de esos, <b>solo 3 de los 10 más grandes ya tienen "
+    "algún equivalente abierto en otra marca (Fujian, OPEX JD, KMP) — y ese equivalente también está sin stock "
+    "hoy.</b> Es decir: no es que la competencia interna (otra marca tuya) ya esté cubriendo esto — está tan "
+    "dormido como Maxiforce. Inyección y kits camisa/pistón/anillos son, juntos, el 40% de todo el hueco (50 de "
+    "126 códigos) — las 2 categorías donde ya vendes más fuerte.</div>",
     unsafe_allow_html=True,
 )
 
@@ -261,10 +284,10 @@ with n2c2:
     )
 
 st.markdown(
-    "<div class='callout-n2'><b>Lectura:</b> el 6090 tiene la mejor proporción demanda-confirmada del análisis "
-    "(23 de 58 códigos faltantes ya tienen import de IPESA detrás, 40%) — más alto que el 4045 (35%) o el 6068 "
-    "(12%). Con solo 36 SKU abiertos ya vende casi tanto como el 6068 con 30 — sugiere que cada SKU nuevo en "
-    "este motor rinde más que el promedio.</div>",
+    "<div class='callout-n2'><b>Lectura:</b> el 6090 tiene la mejor proporción de códigos con evidencia histórica "
+    "de import (23 de 58, 40%) — más alto que el 4045 (35%) o el 6068 (12%), aunque la misma salvedad aplica: esa "
+    "evidencia es 2022-2024, no actual. Con solo 36 SKU abiertos ya vende casi tanto como el 6068 con 30 — sugiere "
+    "que cada SKU nuevo en este motor rinde más que el promedio.</div>",
     unsafe_allow_html=True,
 )
 
@@ -309,10 +332,11 @@ st.divider()
 st.subheader("Síntesis para la reunión")
 st.markdown(
     """
-1. **🟢 4045 — completa lo que ya vendes.** 126 códigos faltantes, 44 con demanda real ya confirmada
-   (US$290K), concentrados en inyección y kits — tus 2 categorías más fuertes. Riesgo más bajo de los 3 niveles.
+1. **🟢 4045 — completa lo que ya vendes.** 126 códigos faltantes, 44 con evidencia histórica de import
+   (US$290K, 2022-2024 — sin dato 2025-2026 por el ocultamiento de código de IPESA), concentrados en inyección
+   y kits — tus 2 categorías más fuertes. Riesgo más bajo de los 3 niveles.
 2. **🟡 6068 y 6090 — sigue el crecimiento.** Ya crecen solos (+34% y +28%) con poco catálogo. 6090 en particular
-   muestra la mejor señal de demanda confirmada (40% de sus códigos faltantes ya tienen import real detrás).
+   tiene la mejor proporción de códigos con esa misma evidencia histórica (40%).
 3. **⚪ 6125 y 6135 — decisión aparte.** Casi sin presencia hoy. No se recomienda ni se descarta — es una
    pregunta para validar con más data antes de comprometer catálogo nuevo.
 """
