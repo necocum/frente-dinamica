@@ -85,7 +85,7 @@ top_actuales_4045 = [
 top_faltantes_4045 = [
     # SKU, producto, categoría, FOB, unid, embarques, años con evidencia, ¿ya en otra marca?
     ("TDZ100217", "Kit de boquillas (inyección)", "Inyección", 85896, 213, 12, "2022-2024", "Fujian (stock=0)"),
-    ("TRE507959", "Bomba", "Bomba de agua", 32470, 16, 9, "2022-2024", "—"),
+    ("TRE507959", "Bomba", "Bomba de inyección (Common Rail)", 32470, 16, 9, "2022-2024", "—"),
     ("TRE568070", "Bomba de inyección", "Inyección", 29305, 23, 5, "2022-2023", "OPEX JD (stock=0)"),
     ("TRE71550",  "Turbocompresor", "Turbo", 29030, 32, 11, "2022-2024", "—"),
     ("TDZ100216", "Kit de boquillas (inyección)", "Inyección", 27647, 87, 9, "2022-2024", "—"),
@@ -108,7 +108,7 @@ top_faltantes_4045 = [
 faltantes_4045_completo = [
     # SKU, Producto, Unid. IPESA, FOB US$, N° embarques, Primer año, Último año, Alternativa en otra marca, Venta 6M alt (S/), Unid. 6M alt
     ("TDZ100217", "Kit de boquillas (inyección)", 213, 85896, 12, 2022, 2024, "Fujian — DZ100217-FIP (stock 0)", 0, 0),
-    ("TRE507959", "Bomba de agua", 16, 32470, 9, 2022, 2024, "—", 0, 0),
+    ("TRE507959", "Bomba de inyección (Common Rail)", 16, 32470, 9, 2022, 2024, "—", 0, 0),
     ("TRE568070", "Bomba de inyección", 23, 29305, 5, 2022, 2023, "OPEX JD — RE.518166-RE568070 (stock 0)", 0, 0),
     ("TRE71550", "Turbocompresor", 32, 29030, 11, 2022, 2024, "—", 0, 0),
     ("TDZ100216", "Kit de boquillas (inyección)", 87, 27647, 9, 2022, 2024, "—", 0, 0),
@@ -212,8 +212,15 @@ k3.metric("Con evidencia histórica de import (IPESA)", "75", "US$ 362K · 2022-
 k4.metric("Venta 2026 de estos 5 motores (Ene-Ago)", sr(1490448 + 82965 + 97302))
 st.caption(
     "⚠️ La \"evidencia de import\" viene de IPESA 2022-jul.2026, pero IPESA casi dejó de declarar el código de "
-    "parte desde 2024 (ver hoja \"IPESA\") — 127 de los 136 códigos validados en todo este análisis tienen su "
+    "parte desde 2024 (ver hoja \"IPESA\") — 127 de los 135 códigos validados en todo este análisis tienen su "
     "última evidencia en 2022-2024, ninguna en 2025-2026. Es un piso histórico, no una medición de demanda actual."
+)
+st.caption(
+    "✅ Auditoría 2026-09-09: los 135 códigos sugeridos (de 136 originales) se verificaron uno por uno contra el "
+    "catálogo técnico Maxiforce (686 págs.) para confirmar que el SKU sugerido corresponde a la misma pieza que "
+    "IPESA declaró. Se corrigió TRE507959 (era \"bomba de agua\", el catálogo lo ubica como bomba de inyección "
+    "Common Rail) y se descartó TT122075 (IPESA lo declaró como \"eje secundario\"; el catálogo lo ubica como "
+    "O-ring de tubo de inyector — pieza distinta, sin relación clara)."
 )
 
 st.divider()
@@ -284,7 +291,7 @@ st.dataframe(
 st.markdown(
     "<div class='callout'><b>⚠️ Ojo con la vigencia de este número — pregunta natural en la reunión.</b> "
     "IPESA prácticamente dejó de escribir el código de parte en su declaración de Aduanas desde 2024 (ver hoja "
-    "\"IPESA\" de este dashboard: 86.6% de líneas con código en 2022 → 3.9% en 2026). Por eso <b>127 de los 136 "
+    "\"IPESA\" de este dashboard: 86.6% de líneas con código en 2022 → 3.9% en 2026). Por eso <b>127 de los 135 "
     "códigos validados en todo este análisis tienen evidencia SOLO entre 2022 y 2024</b> — de los 10 de la tabla, "
     "ninguno tiene una sola línea en 2025 o 2026. Esto no significa que la demanda haya desaparecido: significa "
     "que ya no podemos verla en Aduanas. El número es un <b>piso confirmado con data vieja, no una medición de "
