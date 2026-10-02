@@ -2,8 +2,8 @@
 
 Fuente: ADEX Data Trade (SUNAT / Aduanas del Perú). Histórico completo por RUC
 de IPESA S.A.C. (20101639275), ene.2022–ago.2026, 5 tramos anuales sin truncar
-(183,499 líneas) + agosto 2026 (5,027 líneas, agregado 2026-10-02). Se excluye maquinaria completa (excavadoras, cargadoras,
-tractores, niveladoras, etc.) para quedarnos solo con repuestos.
+(183,499 líneas) + agosto 2026 (5,027 líneas). Se excluyen máquinas y equipos completos con el
+perímetro común a las 3 empresas (ver sección "Crecimiento comparado"). Recalculado completo 2026-10-02.
 """
 
 import plotly.graph_objects as go
@@ -47,22 +47,22 @@ categorias = [
     "Filtro lubricante/carburante (8421.23)",
     "Elementos filtrantes de motor (8421.99)",
     "Filtro entrada de aire (8421.31)",
-    "Partes de maquinaria 84.26/29/30",
-    "Partes árbol de transmisión (levas/cigüeñal)",
+    "Partes de maquinaria 84.26/29/30 (8431.49)",
+    "Partes árbol de transmisión (8483.90)",
+    "Partes de motor diésel (8409.99)",
     "Partes de máquinas n.e.p. (8479.90)",
     "Partes máq. cosechar/trillar (8433.90)",
     "Cuchillas agrícolas (8208.40)",
-    "Filtrar/depurar líquidos (8421.29)",
-    "Bombas volumétricas rotativas (8413.60)",
+    "Partes de transmisiones cardánicas (8708.99)",
 ]
-fob_categorias = [10324250, 6888661, 6233461, 5314416, 4247412, 2686026, 2591735, 2540961, 2110491, 1971087]
+fob_categorias = [10324250, 7147334, 6233462, 5314415, 4854823, 2725170, 2686026, 2591735, 2540961, 2386223]
 
 years = ["2022", "2023", "2024", "2025", "2026*"]
-filtros_fob = [4419694, 3910145, 5660933, 6390467, 5175624]
-filtros_fob_anualizado_2026 = 7760000
+filtros_fob = [4476250, 3956153, 5699546, 6470242, 5213346]
+filtros_fob_anualizado_2026 = 7820020
 
-marcas = [("John Deere", 129463, 70317262), ("Cummins", 1927, 3307802), ("CAT", 80, 91827),
-          ("Scania", 22, 69610), ("Volvo", 12, 15236), ("Case", 6, 9672), ("Deutz", 1, 8138)]
+marcas = [("John Deere", 129711, 68714863), ("Cummins", 1927, 3307802), ("Wirtgen", 2533, 3181966),
+          ("CAT", 29, 66965), ("Scania", 22, 69610), ("Volvo", 12, 15236), ("Case", 6, 9672)]
 
 codigos = [
     ["RE504836", "Filtro aceite/combustible motor", 75, 420762, True, "OPEX JD"],
@@ -134,15 +134,15 @@ st.markdown(
 )
 st.caption(
     "Periodo: **enero 2022 – agosto 2026**, 5 tramos anuales descargados sin truncar + agosto 2026 · Fuente: **ADEX Data Trade** "
-    "sobre registros de SUNAT / Aduanas · Universo tras excluir maquinaria: **181,945 líneas · US$124.0M FOB**"
+    "sobre registros de SUNAT / Aduanas · Universo tras excluir máquinas y equipos completos: **182,160 líneas · US$119.8M FOB**"
 )
 
 # ================= KPI ROW =================
 k1, k2, k3, k4 = st.columns(4)
-k1.metric("Repuestos IPESA 2022–ago.26", "US$124.0M", "excl. maquinaria completa")
-k2.metric("Filtros de motor", "US$25.6M", "8421.23 + 8421.31 + 8421.99 + 8421.29")
-k3.metric("FOB repuestos con marca John Deere", "56.7%", "US$70.3M de US$124.0M")
-k4.metric("Crecimiento filtros 2022→2026e", "+76%", "US$4.42M → US$7.8M anualizado")
+k1.metric("Repuestos IPESA 2022–ago.26", "US$119.8M", "excl. máquinas y equipos completos")
+k2.metric("Filtros de motor", "US$25.8M", "8421.23 + 8421.31 + 8421.99 + 8421.29")
+k3.metric("FOB repuestos con marca John Deere", "57.4%", "US$68.7M de US$119.8M")
+k4.metric("Crecimiento filtros 2022→2026e", "+75%", "US$4.48M → US$7.8M anualizado")
 
 st.divider()
 
@@ -247,8 +247,8 @@ st.markdown(
 )
 st.caption(
     "Perímetro común: se excluyen máquinas y equipos completos (tractores, maquinaria vial, pavimentadoras/fresadoras "
-    "8479.10, cisternas 8716, motores completos 8408, implementos agrícolas completos, instrumentos). Por eso las "
-    "cifras de esta sección no coinciden con los KPI de arriba, que siguen el método original de la hoja. "
+    "8479.10, cisternas 8716, motores completos 8408, implementos agrícolas completos, instrumentos) — el mismo que "
+    "usa toda esta hoja. "
     "Ojo con Dinámica: −3.0% en total repuestos pero +0.4% en la canasta Repaglas — toda su caída está fuera de "
     "las partidas de Repaglas (−21%: dejó de traer aceites lubricantes, menos partes de cosecha y arandelas); en lo "
     "que compite con Repaglas está plana."
@@ -313,15 +313,15 @@ st.divider()
 # ================= SECCIÓN 1: JOHN DEERE =================
 st.subheader("El hallazgo de fondo: IPESA es, ante todo, un importador de repuestos John Deere")
 st.write(
-    "**71.2%** de las líneas de repuesto de IPESA (129,463 de 181,945) mencionan \"John Deere\" en la descripción "
-    "comercial, concentrando **56.7% del FOB** (US$70.3M de US$124.0M). El resto del mercado que atiende es "
-    "residual: Cummins (motores/generadores, US$3.3M), y menciones marginales de CAT, Scania, Volvo, Case y Deutz."
+    "**71.2%** de las líneas de repuesto de IPESA (129,711 de 182,160) mencionan \"John Deere\" en la descripción "
+    "comercial, concentrando **57.4% del FOB** (US$68.7M de US$119.8M). El resto del mercado que atiende es "
+    "residual: Cummins (motores/generadores, US$3.3M), repuestos de maquinaria vial Wirtgen (US$3.2M), y menciones marginales de CAT, Scania, Volvo y Case."
 )
 st.markdown(
     "<div class='callout-op'><b>Esto cambia el marco de la comparación.</b> IPESA no es un competidor "
     "\"adyacente\" que de vez en cuando toca tu terreno — es, en volumen, el mayor importador de repuestos John "
     "Deere del Perú, en el mismo segmento de marca donde Repaglas construyó su liderazgo con Maxiforce (74–100% "
-    "de share en los 10 SKU ancla ya verificados). La escala de IPESA en repuestos JD (US$70.3M) es ~20× el FOB "
+    "de share en los 10 SKU ancla ya verificados). La escala de IPESA en repuestos JD (US$68.7M) es ~19× el FOB "
     "total histórico de Repaglas (US$3.6M) en el mismo periodo.</div>",
     unsafe_allow_html=True,
 )
@@ -334,7 +334,7 @@ st.markdown("#### Filtración de motor es, por lejos, la categoría más grande"
 st.write(
     "Ordenando las partidas arancelarias de repuesto (excluyendo aceites/lubricantes, que son un consumible, no "
     "una pieza) por valor FOB acumulado 2022–ago.2026, las tres primeras posiciones son las tres familias de "
-    "filtro de motor — juntas suman **US$23.4M**, más del doble que la siguiente categoría."
+    "filtro de motor — juntas suman **US$23.7M**, más del doble que la siguiente categoría."
 )
 st.plotly_chart(hbar_single(categorias, fob_categorias, IPE), use_container_width=True)
 st.caption(
@@ -347,8 +347,8 @@ st.divider()
 # ================= SECCIÓN 3: FILTROS EN EL TIEMPO =================
 st.subheader("Filtros de motor: una categoría en crecimiento sostenido")
 st.write(
-    "El FOB de filtros de motor que importa IPESA no es plano — creció de US$3.9M (2023, su año más bajo) a "
-    "US$6.4M (2025), y 2026 va camino a superarlo con holgura (US$5.2M en ene–ago, ≈US$7.8M anualizado; solo agosto "
+    "El FOB de filtros de motor que importa IPESA no es plano — creció de US$4.0M (2023, su año más bajo) a "
+    "US$6.5M (2025), y 2026 va camino a superarlo con holgura (US$5.2M en ene–ago, ≈US$7.8M anualizado; solo agosto "
     "2026 sumó US$1.17M, su mes más alto del año). No es una "
     "categoría de nicho ni en declive: es la línea de repuesto de mayor y más consistente crecimiento en todo el "
     "catálogo de IPESA."
@@ -404,7 +404,7 @@ st.divider()
 st.subheader("Dónde está la oportunidad para Repaglas")
 st.markdown(
     """
-1. **Filtración de motor es la brecha más grande y más clara de todo el catálogo de IPESA** — US$25.6M en 4.7
+1. **Filtración de motor es la brecha más grande y más clara de todo el catálogo de IPESA** — US$25.8M en 4.7
    años, creciendo, y 100% fuera del alcance actual de Repaglas (Maxiforce no fabrica filtros; OPEX JD/Vapormatic
    los tienen pero casi no se venden).
 2. **El primer movimiento no requiere buscar proveedor nuevo.** RE504836, RE541922, RE522868 y KV16429 ya están
@@ -425,9 +425,12 @@ c1, c2 = st.columns(2)
 with c1:
     st.markdown(
         "**Metodología.** 5 exports ADEX Data Trade por RUC de IPESA (2022, 2023, 2024, 2025, 2026 por separado "
-        "para evitar el límite de 80,000 filas), 183,499 líneas totales. Se excluyó maquinaria completa "
-        "filtrando por partida arancelaria (tractores 87.01, palas/cargadoras/niveladoras 84.29/84.30, "
-        "cosechadoras completas 84.33.5x, trituradoras 84.74, gensets 85.02, camiones 87.04/87.05). Los códigos "
+        "para evitar el límite de 80,000 filas), 183,499 líneas, + agosto 2026 (5,027 líneas). Se excluyen máquinas "
+        "y equipos completos por partida arancelaria (tractores 87.01, maquinaria vial 84.29/84.30/84.26/84.27, "
+        "pavimentadoras/fresadoras 84.79.10, fajas sobre oruga 84.28.33, implementos agrícolas completos "
+        "84.32/84.33/84.36 salvo sus partidas de partes, trituradoras 84.74, motores completos 84.08, gensets 85.02, "
+        "camiones 87.04/87.05, remolques/cisternas 87.16, instrumentos 90.15/90.23/90.24/85.26) — el mismo perímetro "
+        "aplicado a Repaglas y Dinámica en la sección de crecimiento comparado. Los códigos "
         "de parte se extrajeron por patrón alfanumérico de los 5 campos de \"Descripción Comercial\" de cada DUA."
     )
 with c2:
