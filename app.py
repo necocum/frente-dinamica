@@ -187,33 +187,48 @@ st.write(
     "una señal de mercado (tipo de cambio, demanda agrícola, o ambas), no de pérdida de terreno relativo — la brecha "
     "en ese mismo tramo (2.04×) sigue por debajo del promedio histórico anual (2.3×)."
 )
-# Variación 2026 vs 2025 en base comparable (ene–jul: 460,553→429,484 Rep, 889,501→807,032 Din;
-# ene–ago: 530,594→483,555 Rep, 1,144,481→984,608 Din).
-cortes = ["Corte a julio (ene–jul)", "Corte a agosto (ene–ago)"]
-var_rep = [-6.7, -8.9]
-var_din = [-9.3, -14.0]
-v1, v2 = st.columns([3, 1])
-with v1:
-    st.markdown("**Variación interanual del FOB importado, 2026 vs. 2025 (mismos meses)**")
-    legend()
-    fig_var = go.Figure()
-    for name, vals, color in (("Repaglas", var_rep, REP), ("Dinámica", var_din, DIN)):
-        fig_var.add_bar(
-            x=cortes, y=vals, name=name, marker_color=color, marker_cornerradius=4,
-            text=[f"{v:.1f}%" for v in vals], textposition="outside", textfont=dict(color="#3d3a33", size=13),
-            hovertemplate=f"<b>{name}</b><br>%{{x}}<br>%{{y:.1f}}% vs. 2025<extra></extra>",
-        )
-    fig_var.update_layout(
-        barmode="group", bargap=0.35, bargroupgap=0.08, height=300, margin=dict(l=10, r=10, t=10, b=10),
-        showlegend=False, yaxis=dict(ticksuffix="%", range=[-17, 0], gridcolor="#e8e2d6", zeroline=True,
-                                     zerolinecolor="#948a76"),
+# FOB acumulado YTD ene–ago de cada año (US$), mismos meses en todos los años para que sea comparable.
+ytd_years = ["2022", "2023", "2024", "2025", "2026"]
+ytd_rep = [463697, 554177, 714124, 530594, 483555]
+ytd_din = [1010425, 1142001, 1196213, 1144481, 984608]
+
+
+def ytd_chart(values, color, name):
+    var = [None] + [(b / a - 1) * 100 for a, b in zip(values, values[1:])]
+    money = [f"US$ {v / 1e6:.2f}M" if v >= 1e6 else f"US$ {v / 1000:,.0f}K" for v in values]
+    labels = [f"<b>{m}</b>" + ("" if p is None else f"<br>{p:+.1f}%") for m, p in zip(money, var)]
+    fig = go.Figure()
+    fig.add_bar(
+        x=ytd_years, y=values, marker_color=color, marker_cornerradius=4, text=labels, textposition="outside",
+        textfont=dict(color="#3d3a33", size=12.5), cliponaxis=False,
+        customdata=[("—" if p is None else f"{p:+.1f}% vs. año anterior") for p in var],
+        hovertemplate=f"<b>{name}</b> · ene–ago %{{x}}<br>US$ %{{y:,.0f}}<br>%{{customdata}}<extra></extra>",
+    )
+    fig.update_layout(
+        height=320, margin=dict(l=10, r=10, t=30, b=10), showlegend=False, bargap=0.35,
+        yaxis=dict(tickprefix="$", tickformat=",.0f", range=[0, max(values) * 1.25], gridcolor="#e8e2d6"),
+        uniformtext=dict(minsize=12, mode="show"),
         plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     )
-    st.plotly_chart(fig_var, use_container_width=True)
-with v2:
-    st.metric("Brecha Dinámica / Repaglas", "2.04×", "ene–ago 2026", delta_color="off")
-    st.metric("Promedio histórico anual", "2.3×", "2022–2025", delta_color="off")
-    st.caption("Agosto profundizó la caída en ambas, más en Dinámica: la brecha 2026 sigue bajo el promedio.")
+    return fig
+
+
+st.markdown("**FOB importado acumulado enero–agosto, año a año** (mismo tramo de meses en cada año)")
+y1, y2 = st.columns(2)
+with y1:
+    st.markdown("<span class='tag-rep'>● Repaglas</span>", unsafe_allow_html=True)
+    st.plotly_chart(ytd_chart(ytd_rep, REP, "Repaglas"), use_container_width=True)
+with y2:
+    st.markdown("<span class='tag-din'>● Dinámica</span>", unsafe_allow_html=True)
+    st.plotly_chart(ytd_chart(ytd_din, DIN, "Dinámica"), use_container_width=True)
+m1, m2, m3 = st.columns(3)
+m1.metric("Repaglas ene–ago 2026 vs. 2025", "−8.9%", "pico en 2024: −32% desde entonces", delta_color="off")
+m2.metric("Dinámica ene–ago 2026 vs. 2025", "−14.0%", "primera caída fuerte de la serie", delta_color="off")
+m3.metric("Brecha Dinámica / Repaglas ene–ago 2026", "2.04×", "promedio histórico anual: 2.3×", delta_color="off")
+st.caption(
+    "Cada gráfico tiene su propia escala (Dinámica importa ~2× más). El % bajo cada monto es la variación contra "
+    "el mismo tramo enero–agosto del año anterior."
+)
 st.markdown("**FOB importado por año**")
 legend()
 st.plotly_chart(grouped_bar(years, yearly_rep, yearly_din), use_container_width=True)
