@@ -187,6 +187,34 @@ st.write(
     "una señal de mercado (tipo de cambio, demanda agrícola, o ambas), no de pérdida de terreno relativo — la brecha "
     "en ese mismo tramo (2.04×) sigue por debajo del promedio histórico anual (2.3×)."
 )
+# Variación 2026 vs 2025 en base comparable (ene–jul: 460,553→429,484 Rep, 889,501→807,032 Din;
+# ene–ago: 530,594→483,555 Rep, 1,144,481→984,608 Din).
+cortes = ["Corte a julio (ene–jul)", "Corte a agosto (ene–ago)"]
+var_rep = [-6.7, -8.9]
+var_din = [-9.3, -14.0]
+v1, v2 = st.columns([3, 1])
+with v1:
+    st.markdown("**Variación interanual del FOB importado, 2026 vs. 2025 (mismos meses)**")
+    legend()
+    fig_var = go.Figure()
+    for name, vals, color in (("Repaglas", var_rep, REP), ("Dinámica", var_din, DIN)):
+        fig_var.add_bar(
+            x=cortes, y=vals, name=name, marker_color=color, marker_cornerradius=4,
+            text=[f"{v:.1f}%" for v in vals], textposition="outside", textfont=dict(color="#3d3a33", size=13),
+            hovertemplate=f"<b>{name}</b><br>%{{x}}<br>%{{y:.1f}}% vs. 2025<extra></extra>",
+        )
+    fig_var.update_layout(
+        barmode="group", bargap=0.35, bargroupgap=0.08, height=300, margin=dict(l=10, r=10, t=10, b=10),
+        showlegend=False, yaxis=dict(ticksuffix="%", range=[-17, 0], gridcolor="#e8e2d6", zeroline=True,
+                                     zerolinecolor="#948a76"),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+    )
+    st.plotly_chart(fig_var, use_container_width=True)
+with v2:
+    st.metric("Brecha Dinámica / Repaglas", "2.04×", "ene–ago 2026", delta_color="off")
+    st.metric("Promedio histórico anual", "2.3×", "2022–2025", delta_color="off")
+    st.caption("Agosto profundizó la caída en ambas, más en Dinámica: la brecha 2026 sigue bajo el promedio.")
+st.markdown("**FOB importado por año**")
 legend()
 st.plotly_chart(grouped_bar(years, yearly_rep, yearly_din), use_container_width=True)
 
