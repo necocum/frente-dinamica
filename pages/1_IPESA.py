@@ -248,7 +248,10 @@ st.markdown(
 st.caption(
     "Perímetro común: se excluyen máquinas y equipos completos (tractores, maquinaria vial, pavimentadoras/fresadoras "
     "8479.10, cisternas 8716, motores completos 8408, implementos agrícolas completos, instrumentos). Por eso las "
-    "cifras de esta sección no coinciden con los KPI de arriba, que siguen el método original de la hoja."
+    "cifras de esta sección no coinciden con los KPI de arriba, que siguen el método original de la hoja. "
+    "Ojo con Dinámica: −3.0% en total repuestos pero +0.4% en la canasta Repaglas — toda su caída está fuera de "
+    "las partidas de Repaglas (−21%: dejó de traer aceites lubricantes, menos partes de cosecha y arandelas); en lo "
+    "que compite con Repaglas está plana."
 )
 
 st.divider()
