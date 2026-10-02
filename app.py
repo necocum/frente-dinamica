@@ -182,10 +182,12 @@ st.write(
     "creció 30% en valor FOB; Dinámica creció 41%, es decir, la distancia se amplía más de lo que se cierra."
 )
 st.write(
-    "2026 muestra el primer año con caída interanual para ambas: en base comparable enero–agosto, Repaglas "
-    "retrocede 8.9% y Dinámica 14.0% (con corte a julio eran −6.7% y −9.3%: agosto profundizó la caída en ambas). Es "
-    "una señal de mercado (tipo de cambio, demanda agrícola, o ambas), no de pérdida de terreno relativo — la brecha "
-    "en ese mismo tramo (2.04×) sigue por debajo del promedio histórico anual (2.3×)."
+    "Mirado al mismo corte (enero–agosto), ambas importan menos en 2026: Repaglas −8.9% y Dinámica −14.0%. Para "
+    "Repaglas la baja no empezó este año — su pico fue 2024 y ya en 2025 cayó 25.7% en el mismo tramo. Pero ese "
+    "corte exagera la caída de Repaglas: está importando **con más frecuencia y en lotes más chicos** (26 DUAs en "
+    "los últimos 12 meses vs. 21 un año antes, con 18% menos FOB por DUA), así que el acumulado a una fecha depende "
+    "mucho de en qué mes cae cada embarque. En **12 meses móviles** (sep–ago), Repaglas está estable (+1.7%, US$ 780K, "
+    "igual a su promedio anual 2022–2025) y es Dinámica la que retrocede (−3.0%)."
 )
 # FOB acumulado YTD ene–ago de cada año (US$), mismos meses en todos los años para que sea comparable.
 ytd_years = ["2022", "2023", "2024", "2025", "2026"]
@@ -221,13 +223,61 @@ with y1:
 with y2:
     st.markdown("<span class='tag-din'>● Dinámica</span>", unsafe_allow_html=True)
     st.plotly_chart(ytd_chart(ytd_din, DIN, "Dinámica"), use_container_width=True)
-m1, m2, m3 = st.columns(3)
-m1.metric("Repaglas ene–ago 2026 vs. 2025", "−8.9%", "pico en 2024: −32% desde entonces", delta_color="off")
-m2.metric("Dinámica ene–ago 2026 vs. 2025", "−14.0%", "primera caída fuerte de la serie", delta_color="off")
-m3.metric("Brecha Dinámica / Repaglas ene–ago 2026", "2.04×", "promedio histórico anual: 2.3×", delta_color="off")
 st.caption(
     "Cada gráfico tiene su propia escala (Dinámica importa ~2× más). El % bajo cada monto es la variación contra "
-    "el mismo tramo enero–agosto del año anterior."
+    "el mismo tramo enero–agosto del año anterior. Brecha Dinámica / Repaglas ene–ago 2026: 2.04×."
+)
+
+# 12 meses móviles cerrando en agosto (sep–ago): neutraliza el efecto de en qué mes cae cada DUA.
+ltm_labels = ["sep22–ago23", "sep23–ago24", "sep24–ago25", "sep25–ago26"]
+ltm_rep = [726207, 867192, 766770, 779503]
+ltm_din = [1601321, 1749396, 1964589, 1905220]
+ltm_duas_rep = [20, 25, 21, 26]
+ltm_duas_din = [64, 61, 70, 75]
+
+
+def ltm_chart(values, duas, color, name):
+    var = [None] + [(b / a - 1) * 100 for a, b in zip(values, values[1:])]
+    money = [f"US$ {v / 1e6:.2f}M" if v >= 1e6 else f"US$ {v / 1000:,.0f}K" for v in values]
+    labels = [f"<b>{m}</b>" + ("" if p is None else f"<br>{p:+.1f}%") for m, p in zip(money, var)]
+    fig = go.Figure()
+    fig.add_bar(
+        x=[f"{l}<br>{d} DUAs · {v / d / 1000:,.0f}K/DUA"
+           for l, d, v in zip(ltm_labels, duas, values)],
+        y=values, marker_color=color, marker_cornerradius=4, text=labels, textposition="outside",
+        textfont=dict(color="#3d3a33", size=12.5), cliponaxis=False,
+        customdata=[[d, v / d] for d, v in zip(duas, values)],
+        hovertemplate=(f"<b>{name}</b> · %{{x}}<br>US$ %{{y:,.0f}}<br>%{{customdata[0]}} DUAs · "
+                       "US$ %{customdata[1]:,.0f} por DUA<extra></extra>"),
+    )
+    fig.update_layout(
+        height=340, margin=dict(l=10, r=10, t=30, b=10), showlegend=False, bargap=0.35,
+        xaxis=dict(tickangle=0, tickfont=dict(size=11)),
+        yaxis=dict(tickprefix="$", tickformat=",.0f", range=[0, max(values) * 1.25], gridcolor="#e8e2d6"),
+        uniformtext=dict(minsize=12, mode="show"),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
+
+st.markdown("**Visión anual: FOB importado en 12 meses móviles cerrando en agosto** (setiembre a agosto)")
+l1, l2 = st.columns(2)
+with l1:
+    st.markdown("<span class='tag-rep'>● Repaglas</span>", unsafe_allow_html=True)
+    st.plotly_chart(ltm_chart(ltm_rep, ltm_duas_rep, REP, "Repaglas"), use_container_width=True)
+with l2:
+    st.markdown("<span class='tag-din'>● Dinámica</span>", unsafe_allow_html=True)
+    st.plotly_chart(ltm_chart(ltm_din, ltm_duas_din, DIN, "Dinámica"), use_container_width=True)
+m1, m2, m3 = st.columns(3)
+m1.metric("Repaglas · 12 meses a ago-26", "+1.7%", "estable: = promedio anual 2022–25", delta_color="off")
+m2.metric("Dinámica · 12 meses a ago-26", "−3.0%", "tras su máximo en sep24–ago25", delta_color="off")
+m3.metric("Repaglas · frecuencia de pedido", "21 → 26 DUAs", "−18% FOB por DUA (lotes más chicos)", delta_color="off")
+st.markdown(
+    "<div class='callout'><b>Lectura:</b> con la estrategia de pedidos más frecuentes y más chicos, Repaglas debe "
+    "leerse en base anual (12 meses móviles), no en acumulado a una fecha: el corte enero–agosto muestra −8.9%, "
+    "pero el año móvil muestra el mismo volumen que su promedio histórico. En 12 meses la brecha con Dinámica es "
+    "2.44× (vs. 2.04× en el corte ene–ago y 2.3× de promedio anual 2022–2025).</div>",
+    unsafe_allow_html=True,
 )
 st.markdown("**FOB importado por año**")
 legend()
