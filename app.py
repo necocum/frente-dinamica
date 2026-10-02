@@ -1,6 +1,6 @@
 """Frente Dinámica — comparativo de importaciones Repaglas vs. Dinámica.
 
-Fuente: ADEX Data Trade (SUNAT / Aduanas del Perú), ene.2022–jul.2026.
+Fuente: ADEX Data Trade (SUNAT / Aduanas del Perú), ene.2022–ago.2026 (ago.2026 agregado el 2026-10-02).
 """
 
 import plotly.graph_objects as go
@@ -34,39 +34,39 @@ st.markdown(
 
 # ================= DATA =================
 years = ["2022", "2023", "2024", "2025", "2026*"]
-yearly_rep = [635727, 707244, 950300, 826542, 429484]
-yearly_din = [1469745, 1695184, 2016322, 2065093, 807032]
+yearly_rep = [635727, 707244, 950300, 826542, 483555]
+yearly_din = [1469745, 1695184, 2016322, 2065093, 984608]
 
-months = ["ago-24", "sep-24", "oct-24", "nov-24", "dic-24", "ene-25", "feb-25", "mar-25",
+months = ["sep-24", "oct-24", "nov-24", "dic-24", "ene-25", "feb-25", "mar-25",
           "abr-25", "may-25", "jun-25", "jul-25", "ago-25", "sep-25", "oct-25", "nov-25",
-          "dic-25", "ene-26", "feb-26", "mar-26", "abr-26", "may-26", "jun-26", "jul-26"]
-monthly_rep = [123598, 82322, 6150, 51305, 96399, 5250, 72650, 122297, 90708, 68676, 63003,
+          "dic-25", "ene-26", "feb-26", "mar-26", "abr-26", "may-26", "jun-26", "jul-26", "ago-26"]
+monthly_rep = [82322, 6150, 51305, 96399, 5250, 72650, 122297, 90708, 68676, 63003,
                37970, 70041, 115723, 33523, 107491, 39211, 11830, 112411, 59115, 65049, 25029,
-               74110, 81940]
-monthly_din = [149804, 173023, 134422, 188103, 324560, 201811, 60848, 109070, 136392, 27131,
+               74110, 81940, 54071]
+monthly_din = [173023, 134422, 188103, 324560, 201811, 60848, 109070, 136392, 27131,
                129202, 225048, 254979, 213680, 318299, 158549, 230084, 134834, 141564, 93027,
-               71746, 100839, 129090, 135932]
+               71746, 100839, 129090, 135932, 177576]
 
 familias = ["Transmisión y ejes", "Motor (pistón, camisa, culata)", "Embrague",
             "Bombas e hidráulica", "Sellos, juntas y retenes", "Rodamientos y cojinetes",
             "Dirección", "Cosecha / labranza", "Sistema de combustible", "Frenos"]
-fam_rep = [69679, 1379797, 87607, 481852, 515243, 312952, 80512, 311, 182464, 14750]
-fam_din = [1896145, 572294, 1173643, 1023867, 538688, 493618, 285843, 207882, 16787, 179655]
+fam_rep = [76022, 1398505, 90287, 488611, 521556, 318480, 81006, 311, 183878, 14842]
+fam_din = [1970847, 572643, 1176696, 1038772, 552516, 502531, 286560, 208492, 18625, 182457]
 
 countries = ["Brasil", "Estados Unidos", "Turquía", "India", "China", "Italia", "Reino Unido", "Colombia"]
-cty_rep = [95986, 2442893, 265382, 266060, 233105, 3511, 165344, 0]
-cty_din = [3848218, 41817, 1402976, 800475, 539116, 409137, 240328, 281151]
+cty_rep = [95986, 2463901, 270781, 278072, 243759, 3662, 168021, 0]
+cty_din = [3967754, 41817, 1404322, 827797, 553722, 418970, 241213, 281151]
 
-ue_rep = [19.19, 20.66, 21.59, 22.29, 23.37]
-ue_din = [15.20, 12.44, 13.36, 11.01, 16.61]
+ue_rep = [19.19, 20.66, 21.59, 22.29, 22.90]
+ue_din = [15.20, 12.44, 13.36, 11.01, 17.57]
 
-duas_rep = [21, 19, 29, 22, 14]
-duas_din = [64, 60, 72, 76, 34]
+duas_rep = [21, 19, 29, 22, 17]
+duas_din = [64, 60, 72, 76, 40]
 
-brand_rep = [("Maxiforce", 7809), ("John Deere", 2855), ("Vapormatic", 2227), ("Bepco", 1635),
-             ("KMP", 692), ("TVH", 363), ("FDR", 267), ("ZF", 130)]
-brand_din = [("Carraro", 2162), ("ZF", 1412), ("AGCO", 1188), ("Bepco", 1068), ("Morel", 941),
-             ("CNH", 899), ("Eaton", 831), ("Assur Power", 388)]
+brand_rep = [("Maxiforce", 7896), ("John Deere", 2927), ("Vapormatic", 2227), ("Bepco", 1893),
+             ("KMP", 692), ("TVH", 615), ("FDR", 267), ("ZF", 130)]
+brand_din = [("Carraro", 2229), ("ZF", 1448), ("AGCO", 1229), ("Bepco", 1068), ("Morel", 941),
+             ("Eaton", 913), ("CNH", 899), ("Assur Power", 388)]
 
 sku1 = [
     ["Representaciones Agrícolas S.R.L.", "REP", 125602, 1676, 74.94, "Estados Unidos / Reino Unido / India", "Maxiforce"],
@@ -159,8 +159,8 @@ st.markdown(
     "frente a **:orange[Dinámica Implementos & Piezas S.A.C.]**, su competidor de mayor volumen en el mercado peruano."
 )
 st.caption(
-    "Periodo: **enero 2022 – julio 2026** (dato definitivo) · Fuente: **ADEX Data Trade** sobre registros de "
-    "SUNAT / Aduanas · Descarga: **27 ago. 2026** · Universo: **31,749 partidas · 496 DUAs**"
+    "Periodo: **enero 2022 – agosto 2026** (dato definitivo) · Fuente: **ADEX Data Trade** sobre registros de "
+    "SUNAT / Aduanas · Descarga: **27 ago. 2026** (+ agosto 2026 el **2 oct. 2026**) · Universo: **32,515 partidas · 505 DUAs**"
 )
 
 # ================= KPI ROW =================
@@ -182,10 +182,10 @@ st.write(
     "creció 30% en valor FOB; Dinámica creció 41%, es decir, la distancia se amplía más de lo que se cierra."
 )
 st.write(
-    "2026 muestra el primer año con caída interanual para ambas: en base comparable enero–julio, Repaglas "
-    "retrocede 6.7% y Dinámica 9.3%. Es una señal de mercado (tipo de cambio, demanda agrícola, o ambas), no de "
-    "pérdida de terreno relativo — la brecha en ese mismo tramo (1.88×) es incluso algo mejor que el promedio "
-    "histórico anual (2.3×)."
+    "2026 muestra el primer año con caída interanual para ambas: en base comparable enero–agosto, Repaglas "
+    "retrocede 8.9% y Dinámica 14.0% (con corte a julio eran −6.7% y −9.3%: agosto profundizó la caída en ambas). Es "
+    "una señal de mercado (tipo de cambio, demanda agrícola, o ambas), no de pérdida de terreno relativo — la brecha "
+    "en ese mismo tramo (2.04×) sigue por debajo del promedio histórico anual (2.3×)."
 )
 legend()
 st.plotly_chart(grouped_bar(years, yearly_rep, yearly_din), use_container_width=True)
@@ -211,16 +211,16 @@ st.subheader("Qué importa cada uno")
 st.markdown("#### El mercado está repartido por especialidad, no por precio")
 st.write(
     "Clasificando cada partida arancelaria por familia de producto, el patrón es nítido: Repaglas concentra su "
-    "FOB en **motor** (pistones, camisas, culatas — US$ 1.38M) y **sistema de combustible**, mientras Dinámica "
-    "domina de forma amplia **transmisión y ejes** (US$ 1.90M), **embrague**, **hidráulica**, **rodamientos**, "
+    "FOB en **motor** (pistones, camisas, culatas — US$ 1.40M) y **sistema de combustible**, mientras Dinámica "
+    "domina de forma amplia **transmisión y ejes** (US$ 1.97M), **embrague**, **hidráulica**, **rodamientos**, "
     "**dirección**, **frenos** y **cosecha**. Son catálogos complementarios más que rivales frontales — salvo en "
     "dos zonas de fricción real."
 )
 legend()
 st.plotly_chart(hbar_chart(familias, fam_rep, fam_din), use_container_width=True)
 st.markdown(
-    "<div class='callout'><b>Zonas de fricción:</b> en <b>sellos/juntas/retenes</b> (US$ 515K Repaglas vs US$ 539K "
-    "Dinámica) y <b>bombas/hidráulica</b> (US$ 482K vs US$ 1.02M) ambos catálogos se superponen de forma directa "
+    "<div class='callout'><b>Zonas de fricción:</b> en <b>sellos/juntas/retenes</b> (US$ 522K Repaglas vs US$ 553K "
+    "Dinámica) y <b>bombas/hidráulica</b> (US$ 489K vs US$ 1.04M) ambos catálogos se superponen de forma directa "
     "— son las familias donde vale la pena comparar precio unitario SKU a SKU, no solo volumen agregado.</div>",
     unsafe_allow_html=True,
 )
@@ -244,7 +244,7 @@ with c2:
     st.markdown("**Dinámica · menciones de marca**")
     brand_bars(brand_din, DIN)
 st.markdown(
-    "<div class='callout'><b>Bepco aparece en ambos catálogos</b> con volumen comparable (1,635 menciones en "
+    "<div class='callout'><b>Bepco aparece en ambos catálogos</b> con volumen comparable (1,893 menciones en "
     "Repaglas vs. 1,068 en Dinámica) — junto con presencia menor cruzada de ZF, KMP, Dana, FDR, TVH y Rota. Es la "
     "marca más expuesta a comparación directa de precio entre ambos importadores.</div>",
     unsafe_allow_html=True,
@@ -256,9 +256,9 @@ st.divider()
 st.subheader("Estrategia de abastecimiento")
 st.markdown("#### Un corredor concentrado frente a una red diversificada")
 st.write(
-    "Repaglas concentra 89% de su FOB en un único corredor: **Estados Unidos** (US$ 2.44M), con exposición "
+    "Repaglas concentra 68% de su FOB en un único corredor: **Estados Unidos** (US$ 2.46M), con exposición "
     "secundaria a India, Turquía, China y Reino Unido. Dinámica reparte su abastecimiento entre **Brasil** "
-    "(US$ 3.85M, su origen dominante — probablemente vinculado a manufactura local de ejes/Carraro), y un bloque "
+    "(US$ 3.97M, su origen dominante — probablemente vinculado a manufactura local de ejes/Carraro), y un bloque "
     "asiático de bajo costo (Turquía, India, China) más Europa y Colombia."
 )
 st.write(
@@ -381,7 +381,7 @@ st.markdown(
 2. **El SKU RE507920 demuestra que Repaglas puede ganar y sostener liderazgo (74% de share) cuando compite en su
    terreno** — con precio, marca propia y consistencia de abastecimiento. Ese mismo libro de jugadas es replicable
    en otras referencias de motor donde hoy no se ha medido el mercado.
-3. **La dependencia de un solo país (EE.UU., 89% del FOB) es el mayor riesgo estructural de Repaglas** frente a la
+3. **La dependencia de un solo país (EE.UU., 68% del FOB) es el mayor riesgo estructural de Repaglas** frente a la
    red multi-origen de Dinámica (Brasil + Asia + Europa). Diversificar 1–2 líneas de motor hacia un segundo origen
    reduciría exposición cambiaria/arancelaria sin resignar el diferencial de calidad.
 4. **Bepco es la marca de mayor solapamiento directo** entre ambos catálogos — el mejor candidato para un
@@ -404,8 +404,9 @@ st.divider()
 c1, c2 = st.columns(2)
 with c1:
     st.markdown(
-        "**Metodología.** Se procesaron 4 reportes ADEX Data Trade (aduanas del Perú, 2022–2026): (1) histórico "
-        "completo de Repaglas + Dinámica por RUC, 31,749 líneas; (2)–(3) búsquedas dirigidas por descripción "
+        "**Metodología.** Se procesaron 5 reportes ADEX Data Trade (aduanas del Perú, 2022–2026): (1) histórico "
+        "completo de Repaglas + Dinámica por RUC, 31,749 líneas (ene.2022–jul.2026), más el reporte de agosto 2026 "
+        "(766 líneas, descargado 2-oct-2026); (2)–(3) búsquedas dirigidas por descripción "
         "comercial para los SKU RE507920 y 87317256; el detalle de Dinámica en solitario (15,097 líneas) se usó "
         "para validar cruces. Las familias de producto se derivaron agrupando la descripción arancelaria de cada "
         "partida por palabra clave; las marcas se cuentan por coincidencia de texto en los 5 campos de "
@@ -414,6 +415,7 @@ with c1:
 with c2:
     st.markdown(
         "**Limitaciones.** ADEX reporta a nivel de DUA/partida, no a nivel de línea de factura — el \"US$/unidad\" "
-        "es un promedio del embarque. Los datos de 2026 son parciales (hasta julio, dato definitivo). \"Otros\" en "
+        "es un promedio del embarque. Los datos de 2026 son parciales (hasta agosto, dato definitivo). Familias y marcas de agosto 2026 se sumaron "
+        "con la misma clasificación por palabra clave sobre las cifras previas. \"Otros\" en "
         "familias de producto agrupa partidas de baja frecuencia no clasificadas por palabra clave."
     )
