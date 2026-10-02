@@ -146,6 +146,113 @@ k4.metric("Crecimiento filtros 2022→2026e", "+76%", "US$4.42M → US$7.8M anua
 
 st.divider()
 
+# ================= CRECIMIENTO COMPARADO (12 MESES MÓVILES) =================
+# Mismo perímetro para las 3 empresas: repuestos = todo menos máquinas/equipos completos (8701, 8429,
+# 8430, 8474, 8502, 8704, 8705, 8716, 8427, 8426, 8408 motores completos, 8479.10 pavimentadoras/
+# fresadoras, 8428.33, 8432/8433/8436 salvo sus partidas de "partes", 9015/9023/9024/8526 instrumentos).
+# "Canasta Repaglas" = las 10 partidas de 4 dígitos que suman el 95.5% del FOB de Repaglas 2022–ago.2026:
+# 8409, 8413, 8483, 8484, 8708, 8487, 8481, 8421, 4016, 8482. Fuente: reportes ADEX por RUC + ago-2026
+# (descarga 2026-10-02). Calculado 2026-10-02.
+ventanas = ["sep22–ago23", "sep23–ago24", "sep24–ago25", "sep25–ago26"]
+crec = {
+    "Total repuestos (sin máquinas completas)": {
+        "Repaglas": [726207, 867192, 766770, 779503],
+        "Dinámica": [1601321, 1749396, 1964589, 1904967],
+        "IPESA": [19786008, 22646006, 26287216, 33927189],
+    },
+    "Canasta Repaglas (mismas 10 partidas)": {
+        "Repaglas": [693497, 831067, 728099, 750564],
+        "Dinámica": [1360048, 1417293, 1651700, 1658557],
+        "IPESA": [10044816, 11823836, 13608783, 17951259],
+    },
+    "Canasta Repaglas sin filtros": {
+        "Repaglas": [670351, 816221, 715233, 742270],
+        "Dinámica": [1280161, 1322660, 1573038, 1575889],
+        "IPESA": [6563593, 6271922, 7491276, 10330894],
+    },
+    "Filtros de motor": {
+        "Repaglas": [23146, 14846, 12866, 8294],
+        "Dinámica": [79887, 94633, 78662, 82668],
+        "IPESA": [3481223, 5551914, 6117507, 7620365],
+    },
+}
+duas_12m = {"Repaglas": [20, 25, 21, 26], "Dinámica": [64, 61, 70, 75], "IPESA": [1099, 947, 1118, 1249]}
+colores = {"Repaglas": REP, "Dinámica": "#eb6834", "IPESA": IPE}
+
+
+def fmt_money(v):
+    return f"US$ {v / 1e6:.2f}M" if v >= 1e6 else f"US$ {v / 1000:,.0f}K"
+
+
+def crec_chart(datos):
+    fig = go.Figure()
+    for emp, vals in datos.items():
+        idx = [v / vals[0] * 100 for v in vals]
+        fig.add_scatter(
+            x=ventanas, y=idx, mode="lines+markers+text", name=emp,
+            line=dict(color=colores[emp], width=2.5), marker=dict(size=9, color=colores[emp]),
+            text=[""] * 3 + [f"{emp} {idx[-1]:.0f}"], textposition="middle right",
+            textfont=dict(color="#3d3a33", size=12.5), cliponaxis=False,
+            customdata=[fmt_money(v) for v in vals],
+            hovertemplate=f"<b>{emp}</b>: índice %{{y:.0f}} · %{{customdata}}<extra></extra>",
+        )
+    fig.add_hline(y=100, line=dict(color="#948a76", width=1, dash="dot"))
+    fig.update_layout(
+        height=360, margin=dict(l=10, r=120, t=10, b=10), hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        yaxis=dict(title="Índice (sep22–ago23 = 100)", gridcolor="#e8e2d6"),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
+
+st.subheader("Crecimiento comparado: IPESA vs. Repaglas vs. Dinámica, últimos 12 meses")
+st.write(
+    "Comparación **papas con papas**: las tres empresas medidas con el mismo perímetro (solo repuestos, sin "
+    "máquinas ni equipos completos), en los mismos periodos de **12 meses móviles cerrando en agosto** — que "
+    "neutralizan la distinta frecuencia de pedido de cada una — y en **índice (sep22–ago23 = 100)**, porque "
+    "IPESA es ~40× más grande que Repaglas y en US$ no se vería a las tres en un mismo gráfico."
+)
+alcance = st.radio("Qué comparar", list(crec.keys()), index=1, horizontal=True, label_visibility="collapsed")
+datos = crec[alcance]
+
+g1, g2 = st.columns([3, 2])
+with g1:
+    st.plotly_chart(crec_chart(datos), use_container_width=True)
+with g2:
+    st.markdown("**Últimos 12 meses (sep25–ago26) vs. 12 meses anteriores**")
+    for emp, vals in datos.items():
+        st.metric(emp, fmt_money(vals[3]), f"{(vals[3] / vals[2] - 1) * 100:+.1f}% vs. sep24–ago25")
+
+st.dataframe(
+    {
+        "Empresa": list(datos.keys()),
+        **{v: [fmt_money(vals[i]) for vals in datos.values()] for i, v in enumerate(ventanas)},
+        "Var. último año": [f"{(vals[3] / vals[2] - 1) * 100:+.1f}%" for vals in datos.values()],
+        "DUAs (últ. 12m vs. ant.)": [f"{duas_12m[e][3]:,} vs {duas_12m[e][2]:,}" for e in datos],
+    },
+    use_container_width=True,
+    hide_index=True,
+)
+st.markdown(
+    "<div class='callout-op'><b>Lectura — IPESA crece ~30% mientras Repaglas y Dinámica están planas.</b> En los "
+    "últimos 12 meses IPESA creció <b>+29%</b> en repuestos y <b>+32% en la misma canasta de partidas que trae "
+    "Repaglas</b> (Repaglas +3%, Dinámica 0%). No es solo filtros (+25%): sacando filtros, IPESA crece <b>+38%</b> "
+    "en el núcleo motor/transmisión, con 8409 partes de motor casi duplicándose (US$0.54M → US$1.05M). Ese "
+    "crecimiento <b>no viene de repuestos declarados John Deere</b> (planos: US$4.8M → US$4.9M en la canasta sin "
+    "filtros), sino de <b>Cummins</b> (US$0.2M → US$1.7M), <b>rodamientos NKS</b> y otras marcas, y repuestos del "
+    "grupo Wirtgen. IPESA está ensanchando catálogo dentro de las mismas partidas arancelarias de Repaglas, pero "
+    "hacia marcas donde Repaglas no está.</div>",
+    unsafe_allow_html=True,
+)
+st.caption(
+    "Perímetro común: se excluyen máquinas y equipos completos (tractores, maquinaria vial, pavimentadoras/fresadoras "
+    "8479.10, cisternas 8716, motores completos 8408, implementos agrícolas completos, instrumentos). Por eso las "
+    "cifras de esta sección no coinciden con los KPI de arriba, que siguen el método original de la hoja."
+)
+
+st.divider()
+
 # ================= AVISO: IPESA DEJÓ DE DECLARAR CÓDIGOS =================
 st.subheader("⚠️ Aviso: desde 2024, IPESA casi dejó de declarar el código de parte en Aduanas")
 st.write(
