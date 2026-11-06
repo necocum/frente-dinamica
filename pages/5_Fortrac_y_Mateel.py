@@ -61,7 +61,7 @@ TOTAL_MAT = sum(fob_mat)
 ytd_rep = (646317, 585415)   # ene-set 2025, ene-set 2026
 ytd_for = (368155, 638346)
 ytd_mat = (2427, 64366)
-FOR_DUA_MOTORES = 127564  # un solo DUA (31376, ene.2026) de 10 motores JD completos
+FOR_DUA_MOTORES = 127564  # un solo DUA (31376, ene.2026) de 12 motores JD completos
 
 # Detalle logístico del DUA de los motores + los demás envíos de Fortrac con país "Francia" —
 # investigado 2026-09-03 a pedido del usuario. "País" en ADEX es el país de fabricación
@@ -333,7 +333,7 @@ c2.metric("Fortrac", f"{usd(ytd_for[1])}", f"{(ytd_for[1]/ytd_for[0]-1)*100:+.1f
 c3.metric("Mateel", f"{usd(ytd_mat[1])}", f"{(ytd_mat[1]/ytd_mat[0]-1)*100:+.0f}% vs. ene-set 2025")
 st.markdown(
     f"<div class='callout'><b>Ojo con el dato bruto de Fortrac (+73%):</b> un solo DUA de enero 2026 "
-    f"(10 motores completos John Deere \"bare engine\", {usd(FOR_DUA_MOTORES)}) infla el número — es "
+    f"(12 motores completos John Deere: 10 \"bare engine\" 6068 y 2 de 4045, {usd(FOR_DUA_MOTORES)}) infla el número — es "
     f"importación de motor completo, no repuesto, y no compite directamente con el catálogo de Repaglas. "
     f"<b>Descontando ese lote</b>, el crecimiento real de Fortrac en repuestos es <b>+38.7%</b> — bien por "
     f"encima igual, y en la dirección opuesta a Repaglas (−9.4% en la misma ventana; agosto 2026, con US$100K, fue "
@@ -412,7 +412,7 @@ st.markdown(
     "Europa/LatAm), no el domicilio de quien le vendió el motor a Fortrac. Lo más plausible es que haya "
     "comprado a un <b>distribuidor o dealer autorizado de John Deere</b> (posiblemente en EE.UU., por el "
     "patrón del resto de sus compras) que revende repuestos y motores genuinos de fábrica — no una compra "
-    "directa a Deere. Y en volumen, es chico: 10 motores es un pedido puntual, no una línea de abastecimiento "
+    "directa a Deere. Y en volumen, es chico: 12 motores es un pedido puntual, no una línea de abastecimiento "
     "recurrente — es la única vez que Fortrac trae motores completos en los 4.5 años de este reporte.</div>",
     unsafe_allow_html=True,
 )
@@ -447,7 +447,7 @@ with mcol3:
     st.plotly_chart(bar_month_2y(MESES_2026, mes_2025_mat, mes_2026_mat, MAT), use_container_width=True, key="m2y_mat")
 st.caption(
     "Repaglas sube en 4 meses de 2026 (ene, feb, jun, jul) y baja en 5 (mar–may, ago, set). El pico de Fortrac "
-    "en enero-2026 (US$229K) es el DUA de los 10 motores completos ya explicado arriba; sin ese mes, su patrón "
+    "en enero-2026 (US$229K) es el DUA de los 12 motores completos ya explicado arriba; sin ese mes, su patrón "
     "mensual es más parejo que el de Repaglas, y en ago–set 2026 supera a su propio ago–set 2025. Mateel "
     "prácticamente no compró nada en 2025 (solo marzo) — su actividad 2026 es, en términos relativos, toda "
     "nueva, y se cortó en julio."
@@ -751,7 +751,7 @@ with c1:
 with c2:
     st.markdown(
         "**Limitaciones.** El campo de marca es texto libre declarado por el importador — puede subestimar "
-        "el verdadero % John Deere si algún despacho lo omite. El DUA de 10 motores completos de Fortrac "
+        "el verdadero % John Deere si algún despacho lo omite. El DUA de 12 motores completos de Fortrac "
         "(ene.2026) se identificó y descontó manualmente por ser importación de motor completo, no repuesto "
         "— podría haber otros lotes atípicos menores sin detectar. 2026 es parcial (solo hasta setiembre) en "
         "las tres empresas."
