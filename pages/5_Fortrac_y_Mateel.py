@@ -286,7 +286,7 @@ st.divider()
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("FOB Fortrac 2022–set.26", usd(TOTAL_FOR), f"{TOTAL_FOR/TOTAL_REP*100:.0f}% del FOB de Repaglas")
 k2.metric("FOB con marca \"John Deere\" (Fortrac)", "91.0%", "vs. 28.8% en Mateel")
-k3.metric("Crecimiento repuestos, ene-set 2026", "+39%", "Fortrac, excl. 1 lote de motores · Repaglas: −9.4%")
+k3.metric("Crecimiento repuestos Fortrac, ene-set 2026", "+39%", "todo su catálogo, sin motores · en partidas de Repaglas: +28%")
 k4.metric("¿Compran marca Maxiforce genuina?", "Sí, ambos", "Fortrac: 7 restocks 2022-set.26 · Mateel: 3, ninguno desde ago-2024")
 
 st.divider()
@@ -337,7 +337,10 @@ st.markdown(
     f"importación de motor completo, no repuesto, y no compite directamente con el catálogo de Repaglas. "
     f"<b>Descontando ese lote</b>, el crecimiento real de Fortrac en repuestos es <b>+38.7%</b> — bien por "
     f"encima igual, y en la dirección opuesta a Repaglas (−9.4% en la misma ventana; agosto 2026, con US$100K, fue "
-    f"su segundo mes más alto del año después de marzo). El salto de Mateel "
+    f"su segundo mes más alto del año después de marzo). <b>Comparando lo mismo:</b> ese +38.7% es todo su catálogo. "
+    f"En las mismas partidas que Repaglas, Fortrac crece +27.7% (ene–set) o +9.7% (12 meses), casi todo con John Deere "
+    f"original, y solo el 18% de lo que trae son códigos que Repaglas importa. Del lado de Repaglas, el −9.4% viene casi "
+    f"entero del cambio Vapormatic → Bepco (sin esas dos marcas: +0.5%). El salto de Mateel "
     f"(de US$2,427 a US$64,366) parte de una base casi nula — no viene de un solo lote grande, son varios "
     f"DUA de sellos, mangueras y kits repartidos entre febrero y julio, y en agosto–setiembre no importó nada — "
     f"conviene ver un año completo antes de leerlo como tendencia consolidada.</div>",
@@ -717,14 +720,16 @@ st.markdown(
     """
 1. **Cambio de marco.** Dentro de los 10 SKU ancla, Fortrac aparecía como un rival menor (2-9% de share
    por código). Visto en su catálogo completo, es un importador de **US$2.37M en 4.75 años, 91.0% marca
-   John Deere, casi todo en categorías de motor** — el mismo terreno donde Repaglas construyó su liderazgo.
+   John Deere** — pero con otro perfil: en 2026 los kits de motor (el núcleo de Repaglas) son solo el 7% de lo
+   que trae, y el 81% son códigos que Repaglas nunca importó (retenes, hidráulica, electrónica, transmisión).
    Es chico comparado con IPESA (US$123.4M en repuestos), pero grande comparado con la escala real de
    Repaglas: **64% de su FOB histórico**, no un jugador anecdótico.
-2. **La brecha de crecimiento 2026 es la señal más urgente.** Con el mismo criterio ene-set usado en el
-   resto del dashboard, Repaglas cae 9.4% mientras Fortrac crece 38.7% (ya descontado el lote de motores
-   completos) y Mateel se dispara desde una base casi nula (aunque sin compras en ago–set). Ninguno de los dos explica todavía un cambio de
-   share grande por sí solo, pero es la primera vez que se ve a un rival de motor acelerando mientras
-   Repaglas desacelera en la misma ventana.
+2. **La brecha de crecimiento 2026, leída comparando lo mismo.** En todo su catálogo Fortrac crece 38.7%
+   (sin motores) y Repaglas cae 9.4%, pero no es una comparación pareja: en las mismas partidas Fortrac crece
+   +27.7% (ene–set) o +9.7% (12 meses), casi todo con John Deere original, y la caída de Repaglas viene casi
+   entera del cambio Vapormatic → Bepco (sin esas dos marcas, Repaglas está plano, +0.5%). Mateel se dispara
+   desde una base casi nula (sin compras en ago–set). Fortrac crece en lo que Repaglas no trae; no le está
+   quitando volumen directamente.
 3. **Filtros de motor, otra vez.** Fortrac ya supera a Repaglas en las dos categorías de filtro — la misma
    brecha identificada con IPESA (pendiente #1 y #2 de la bitácora del proyecto) aparece confirmada en un
    segundo competidor independiente.

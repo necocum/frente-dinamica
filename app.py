@@ -190,8 +190,11 @@ st.write(
     "está importando **con más frecuencia y en lotes más chicos** (27 DUAs en los últimos 12 meses vs. 21 un año "
     "antes, con 26% menos FOB por DUA), así que el acumulado a una fecha depende mucho de en qué mes cae cada "
     "embarque. En **12 meses móviles** (oct–sep), Repaglas baja −4.3% (US$ 766K, 1.8% por debajo de su promedio "
-    "anual 2022–2025 de US$ 780K) y Dinámica baja el doble (−8.3%). Ojo: con la ventana anterior (sep–ago) Repaglas "
-    "daba +1.7% — la diferencia es que setiembre 2025 (US$ 116K) fue un mes fuerte que ahora sale de la ventana."
+    "anual 2022–2025 de US$ 780K) y Dinámica baja −8.3% en total. Ojo: con la ventana anterior (sep–ago) Repaglas "
+    "daba +1.7% — la diferencia es que setiembre 2025 (US$ 116K) fue un mes fuerte que ahora sale de la ventana. "
+    "**Comparando lo mismo:** la caída de Dinámica está fuera de las partidas de Repaglas — en la misma canasta "
+    "Dinámica sube +3.5% y Repaglas baja −2.7% (12 meses). Y el −9.4% ene–set de Repaglas se explica casi entero "
+    "por el cambio de Vapormatic a Bepco (−US$ 63K): sin esas dos marcas, Repaglas está plano (+0.5%)."
 )
 # FOB acumulado YTD ene–set de cada año (US$), mismos meses en todos los años para que sea comparable.
 ytd_years = ["2022", "2023", "2024", "2025", "2026"]
@@ -274,13 +277,15 @@ with l2:
     st.plotly_chart(ltm_chart(ltm_din, ltm_duas_din, DIN, "Dinámica"), use_container_width=True)
 m1, m2, m3 = st.columns(3)
 m1.metric("Repaglas · 12 meses a set-26", "−4.3%", "1.8% bajo su promedio anual 2022–25", delta_color="off")
-m2.metric("Dinámica · 12 meses a set-26", "−8.3%", "tras su máximo en oct24–sep25", delta_color="off")
+m2.metric("Dinámica · 12 meses a set-26", "−8.3%", "total; en partidas de Repaglas: +3.5%", delta_color="off")
 m3.metric("Repaglas · frecuencia de pedido", "21 → 27 DUAs", "−26% FOB por DUA (lotes más chicos)", delta_color="off")
 st.markdown(
     "<div class='callout'><b>Lectura:</b> con la estrategia de pedidos más frecuentes y más chicos, Repaglas debe "
     "leerse en base anual (12 meses móviles), no en acumulado a una fecha. Aun así, cerrando en setiembre el año "
     "móvil muestra una baja moderada (−4.3%) que con la ventana sep–ago no se veía (+1.7%): conviene confirmarlo "
-    "con octubre antes de leerlo como tendencia. Dinámica cae el doble (−8.3%). En 12 meses la brecha con "
+    "con octubre antes de leerlo como tendencia. Dinámica baja −8.3% en total, pero no en las partidas de Repaglas: "
+    "en esa misma canasta Dinámica sube +3.5% y Repaglas baja −2.7%. En Repaglas, el corte ene–set (−9.4%) "
+    "viene casi todo del cambio Vapormatic → Bepco; sin esas dos marcas está plano (+0.5%). En 12 meses la brecha con "
     "Dinámica es 2.40× (vs. 1.93× en el corte ene–set y 2.3× de promedio anual 2022–2025).</div>",
     unsafe_allow_html=True,
 )
