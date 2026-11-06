@@ -55,7 +55,7 @@ st.markdown(
 )
 st.caption(
     "Metodología: búsqueda del texto \"MAXIFORCE\" en los 5 campos de Descripción Comercial de "
-    "los 10 reportes ADEX (2022–jul.2026), deduplicado por DUA+RUC+cantidad+FOB. Un importador "
+    "los reportes ADEX de los 10 SKU (2022–set.2026), deduplicado por DUA+RUC+cantidad+FOB. Un importador "
     "puede traer Maxiforce para un SKU y otra marca (John Deere, genérico) para otro — esta hoja "
     "solo cuenta las unidades explícitamente etiquetadas Maxiforce."
 )
@@ -76,7 +76,7 @@ st.subheader("Evolución de importación de marca Maxiforce, por año")
 st.write(
     "Repaglas frente a los 7 importadores que trajeron marca Maxiforce genuina en al menos uno de "
     "los 10 SKU ancla, con unidades por año (agregado de todos los SKU en los que aparece cada "
-    "uno). **2026 es parcial** (solo hasta julio)."
+    "uno). **2026 es parcial** (solo hasta setiembre)."
 )
 
 fig = go.Figure()
@@ -105,22 +105,24 @@ st.dataframe(
         "2024": [f["por_anio"].get(2024, 0) for f in filas_tabla],
         "2025": [f["por_anio"].get(2025, 0) for f in filas_tabla],
         "2026*": [f["por_anio"].get(2026, 0) for f in filas_tabla],
-        "Total 2022-jul.26": [f["total"] for f in filas_tabla],
+        "Total 2022-set.26": [f["total"] for f in filas_tabla],
         "Share %": [f"{f['total']/total_general*100:.1f}%" for f in filas_tabla],
     },
     use_container_width=True, hide_index=True,
 )
-st.caption("0 = sin importaciones de marca Maxiforce registradas ese año. 2026 es parcial, solo hasta julio.")
+st.caption("0 = sin importaciones de marca Maxiforce registradas ese año. 2026 es parcial, solo hasta setiembre.")
 
 st.markdown(
     "<div class='callout'><b>Lectura:</b> <b>R Y G Rockcat</b> se retiró de forma limpia "
     "(116→44→16→0→0), la misma señal de \"vía libre\" que ya vimos en otros rivales caros. "
     "<b>Fortrac</b> es la señal a vigilar: pasó de 7 unidades (2022) a <b>0 en 2023 y 2024</b> y "
-    "luego saltó a <b>99 en 2025</b> — ese salto coincide con el mismo salto que ya habíamos "
+    "luego saltó a <b>99 en 2025</b> y ya lleva <b>94 en 2026 a setiembre</b> (52 solo en el DUA del "
+    "05/08) — va camino a superar 2025. Ese salto coincide con el mismo salto que ya habíamos "
     "marcado 🔴 en RE507850 (Sección \"Tendencia por importador\" de SKU Ancla): ahora sabemos que "
     "parte de ese volumen es marca Maxiforce genuina, no un equivalente. <b>Mateel</b> y "
-    "<b>R & T Rockcat</b> aparecieron solo en 2023-2024 y no repitieron en 2025-2026 — dormidos, no "
-    "confirmados como retirados.</div>",
+    "<b>R & T Rockcat</b> aparecieron solo en 2023-2024 y no repitieron Maxiforce en 2025-2026. Ojo: R & T "
+    "Rockcat <b>sí volvió en set-2026</b>, pero con otra marca (ASSUR POWER, 60-75% del precio de Repaglas) — "
+    "por eso no aparece aquí; ver hoja SKU Ancla.</div>",
     unsafe_allow_html=True,
 )
 
@@ -130,7 +132,7 @@ st.divider()
 st.subheader("Detalle por SKU y año — en qué códigos compite cada rival, y a qué precio")
 st.write(
     "Mismos 4 rivales recurrentes, comparados **año contra año** — el precio del rival en 2024 se "
-    "compara con el precio de Repaglas en 2024, no con un promedio 2022-jul.2026 mezclado. "
+    "compara con el precio de Repaglas en 2024, no con un promedio 2022-set.2026 mezclado. "
     "Ordenado del **año más reciente al más viejo**, así lo primero que se ve es lo más vigente."
 )
 st.caption(
@@ -177,9 +179,9 @@ st.markdown(
     "<div class='callout'><b>Lectura año contra año:</b> comparado en el mismo año, la mayoría de "
     "estos precios sigue en 90%-140% del precio de Repaglas (a la par o más caro) — el promedio "
     "multi-año no estaba maquillando nada grave en general. La excepción real es "
-    "<b>Fortrac en RE504914</b>: pagó 94% en 2022, subió a 104% en 2025, y bajó a <b>80% en 2026</b> "
-    "— el dato más reciente de todos y el único caso donde un rival recurrente quedó claramente por "
-    "debajo de Repaglas en su año más actual. El resto de comparaciones \"baratas\" (Mateel 77% en "
+    "<b>Fortrac en RE504914</b>: pagó 94% en 2022, subió a 104% en 2025, y bajó a <b>80% en 2026</b>. "
+    "Con la compra de agosto 2026 se suma <b>Fortrac en RE500734 (84%)</b>; en RE507850 y RE507920 "
+    "compró a la par (97-102%) y en RE66820/RE501455 más caro (110%). El resto de comparaciones \"baratas\" (Mateel 77% en "
     "RE507850, 78% en RE507920) son de <b>2023-2024</b>, no del año más reciente — no asumir que "
     "siguen vigentes sin una compra más nueva que lo confirme.</div>",
     unsafe_allow_html=True,

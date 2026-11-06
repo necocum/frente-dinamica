@@ -2,7 +2,7 @@
 
 Fuente: ADEX Data Trade (SUNAT / Aduanas del Perú). Búsqueda dirigida por
 Descripción Comercial (código OEM John Deere) para cada uno de los 10 SKU
-Maxiforce de mayor venta de Repaglas, 2022–jul.2026. Ranking de venta desde
+Maxiforce de mayor venta de Repaglas, 2022–set.2026. Ranking de venta desde
 Bsale (Dashboard_Ventas_20260818, ene–jul 2026).
 """
 
@@ -38,19 +38,19 @@ st.markdown(
 sku_ancla = load_sku_ancla()
 
 # Detalle de precio de compra (FOB/unidad) por rival, solo 2025-2026 — específico de esta
-# hoja, no se necesita en el resto del dashboard. Recalculado 2026-09-01 desde los reportes
+# hoja, no se necesita en el resto del dashboard. Recalculado 2026-11-06 (con ago–set 2026) desde los reportes
 # ADEX reales (ver utils/data.py); top 3 rivales por unidades en el periodo.
 PRICE_RIVALS = {
     "RE65966": [("Corporación Pesquera Inca", 269.42, 4)],
-    "R116383": [],
-    "RE536083": [("Dinámica", 60.77, 10), ("JPK Mundo Parts", 65.55, 8)],
-    "RE500734": [("P&G Repuestos", 25.58, 40), ("Dinámica", 55.00, 30), ("Fortrac", 75.52, 21)],
-    "RE66820": [("Fortrac", 14.69, 42), ("JPK Mundo Parts", 13.11, 8), ("AG Import Parve", 5.00, 8)],
-    "RE507850": [("Fortrac", 58.70, 161), ("Mateel", 39.55, 12), ("Monsante", 233.11, 6)],
-    "RE501455": [("Dinámica", 51.66, 20), ("JPK Mundo Parts", 53.36, 8), ("Fortrac", 91.58, 7)],
-    "RE504914": [("Fortrac", 132.34, 42), ("P&G Repuestos", 45.46, 10), ("Maquinarias y Repuestos", 546.10, 7)],
-    "RE507920": [("Fortrac", 144.56, 44), ("JPK Mundo Parts", 57.54, 16), ("Dinámica", 55.71, 13)],
-    "RE48786": [("Maquinarias y Repuestos", 146.44, 33), ("Gamotor Electronic", 16.50, 20), ("IM Selva", 107.72, 18)],
+    "R116383": [("R & T Rockcat", 18.18, 12)],
+    "RE536083": [("R & T Rockcat", 60.60, 12), ("Dinámica", 60.77, 10), ("JPK Mundo Parts", 65.55, 8)],
+    "RE500734": [("P&G Repuestos", 25.58, 40), ("Fortrac", 73.97, 31), ("Dinámica", 55.00, 30)],
+    "RE66820": [("Fortrac", 14.51, 52), ("R & T Rockcat", 12.12, 12), ("JPK Mundo Parts", 13.11, 8)],
+    "RE507850": [("Fortrac", 60.09, 173), ("R & T Rockcat", 55.55, 12), ("Mateel", 39.55, 12)],
+    "RE501455": [("Dinámica", 51.66, 20), ("JPK Mundo Parts", 53.36, 8), ("Suministros Automotrices e Imp.", 38.62, 8)],
+    "RE504914": [("Fortrac", 132.34, 42), ("R & T Rockcat", 53.53, 12), ("P&G Repuestos", 45.46, 10)],
+    "RE507920": [("Fortrac", 123.51, 64), ("R & T Rockcat", 55.55, 24), ("JPK Mundo Parts", 57.54, 16)],
+    "RE48786": [("Construcción Mecánica J&K", 39.76, 46), ("Maquinarias y Repuestos", 146.44, 33), ("Suministros Automotrices e Imp.", 17.63, 30)],
 }
 
 # Tuplas (code, sku, desc, cant26, venta26, share, n_imp, precio, rivals) para no tocar
@@ -92,7 +92,7 @@ st.markdown("###### 🔧 INTELIGENCIA COMERCIAL · ADUANAS DEL PERÚ (ADEX DATA 
 st.title("Los 10 SKU Maxiforce ancla")
 st.markdown(
     "Los **10 SKU de marca :blue[Maxiforce] con mayor venta** de Repaglas (Ene–Jul 2026), verificados uno por "
-    "uno en ADEX Comercial.aspx: liderazgo de importación (share de FOB, todo el histórico 2022–jul.2026) y "
+    "uno en ADEX Comercial.aspx: liderazgo de importación (share de FOB, todo el histórico 2022–set.2026) y "
     "comparación de precio de compra (FOB por unidad, 2025–2026) contra cada rival identificado."
 )
 st.caption(
@@ -105,7 +105,7 @@ shares = [s[5] for s in skus]
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("Share promedio (10 SKU)", f"{sum(shares)/len(shares):.1f}%")
 k2.metric("SKU con share > 85%", f"{sum(1 for s in shares if s>85)} / 10")
-k3.metric("SKU más disputados", "RE504914 · RE48786", "42.3% y 44.7% — IPESA es el rival en ambos")
+k3.metric("SKU más disputados", "RE504914 · RE48786", "43.0% y 44.9% — IPESA es el rival en ambos")
 k4.metric("Rival recurrente", "IPESA", "líder o segundo en 7 de 10 SKU — no Dinámica")
 
 st.divider()
@@ -120,7 +120,7 @@ st.dataframe(
         "Producto": [s[2] for s in skus],
         "Cant. vendida 2026": [s[3] for s in skus],
         "Venta S/ 2026": [f"S/{s[4]:,.0f}" for s in skus],
-        "Share Repaglas (2022-jul.26)": [f"{s[5]:.1f}%" for s in skus],
+        "Share Repaglas (2022-set.26)": [f"{s[5]:.1f}%" for s in skus],
         "N° importadores": [s[6] for s in skus],
         "FOB/unidad Repaglas (25-26)": [usd(s[7]) for s in skus],
     },
@@ -149,10 +149,12 @@ for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
 st.markdown(
     "<div class='callout'><b>Lectura:</b> Repaglas lidera los 10 códigos, pero el share real (recalculado desde "
     "los reportes ADEX completos, no la muestra a mano anterior) es más disputado de lo que parecía: solo "
-    "<b>R116383</b> (94.2%) y <b>RE66820</b> (88.7%) superan 85% de share; en el otro extremo, <b>RE504914</b> "
-    "(42.3%) y <b>RE48786</b> (44.7%) están por debajo de la mitad del mercado. En ambos casos el rival de fondo "
+    "<b>R116383</b> (93.9%) y <b>RE66820</b> (88.7%) superan 85% de share; en el otro extremo, <b>RE504914</b> "
+    "(43.0%) y <b>RE48786</b> (44.9%) están por debajo de la mitad del mercado. En ambos casos el rival de fondo "
     "es el mismo: <b>IPESA</b>, que aparece con volumen material en 7 de los 10 códigos — no Dinámica, que solo "
-    "compite de forma marginal (2-6% de share) en la mitad de la canasta.</div>",
+    "compite de forma marginal (2-6% de share) en la mitad de la canasta. <b>Nuevo (set-2026):</b> <b>R & T Rockcat</b> "
+    "trajo 9 de los 10 códigos en un solo DUA (22/09) con marca ASSUR POWER, a 60-75% del precio de Repaglas en 8 de ellos — "
+    "todavía es poco volumen (4-24 unidades por código), pero es el primer rival que entra a toda la canasta a la vez.</div>",
     unsafe_allow_html=True,
 )
 
@@ -165,7 +167,7 @@ st.write(
     "histórico** en ese SKU (no un agregado de \"resto del mercado\"). Cada rival lleva su **share de FOB**, su "
     "**precio vs. Repaglas** y una **lectura** que cruza ambos ejes — un rival barato y creciendo importa mucho "
     "más que uno caro y en retirada, aunque el share agregado de Repaglas no distinga entre los dos. "
-    "**2026 es parcial** (solo hasta julio), así que su barra es más baja por diseño, no por caída real de "
+    "**2026 es parcial** (solo hasta setiembre), así que su barra es más baja por diseño, no por caída real de "
     "demanda; cuando un rival no importó nada un año, simplemente no tiene barra ese año."
 )
 st.markdown(
@@ -225,7 +227,9 @@ st.markdown(
     "en <b>RE66820</b> y <b>RE507850</b> ocurre lo contrario — un rival barato (RE66820) o a precio idéntico "
     "(RE507850) multiplicó su volumen en su año más reciente con dato completo. En el resto (R116383, RE536083, "
     "RE500734, RE501455, RE504914, RE48786) hay rivales muy baratos que compraron una sola vez y no volvieron: "
-    "no es retirada confirmada, es ausencia de datos — vale la pena revisar si reaparecen en 2026.</div>",
+    "no es retirada confirmada, es ausencia de datos. Con ago–set 2026 ya reaparecieron dos: <b>Suministros "
+    "Automotrices</b> (RE501455, RE48786, RE500734 a 32-52% del precio) y <b>R & T Rockcat</b> (9 códigos, ASSUR "
+    "POWER, 60-75% en 8). Por eso RE507920 pasa de vía libre a vigilar.</div>",
     unsafe_allow_html=True,
 )
 
@@ -236,7 +240,7 @@ st.subheader("Cuadro de evolución por año — todos los proveedores")
 st.write(
     "Mismo dato que arriba pero sin recorte a 2 rivales y en números, no en gráfico — para inspeccionar el "
     "detalle completo de cada SKU, incluyendo importadores muy chicos (1-2 unidades) que no entran en el "
-    "gráfico. Ordenado de mayor a menor por unidades totales 2022-jul.2026."
+    "gráfico. Ordenado de mayor a menor por unidades totales 2022-set.2026."
 )
 seleccion_ev = st.multiselect(
     "SKU a inspeccionar", options=[s[1] for s in skus], default=[skus[0][1]], key="sel_evolucion",
@@ -255,13 +259,13 @@ for code, sku, desc, cant, venta, share, n, precio, rivals in skus:
             "2024": [f["por_anio"].get(2024, 0) for f in filas],
             "2025": [f["por_anio"].get(2025, 0) for f in filas],
             "2026*": [f["por_anio"].get(2026, 0) for f in filas],
-            "Total 2022-jul.26": [f["total"] for f in filas],
+            "Total 2022-set.26": [f["total"] for f in filas],
         },
         use_container_width=True, hide_index=True, key=f"evolucion_{code}",
     )
 st.caption(
     "0 = sin importaciones registradas ese año (no cero ventas, cero importación directa detectada en ADEX "
-    "para ese código). 2026 es parcial, solo hasta julio."
+    "para ese código). 2026 es parcial, solo hasta setiembre."
 )
 
 st.divider()
@@ -293,7 +297,9 @@ st.markdown(
     "(otro fabricante asiático) más que el mismo producto — no tomar como benchmark de precio sólido sin repetirse "
     "en más de un periodo. Los demás rivales (Fortrac, IPESA, Maquinarias y Repuestos, Corporación Pesquera Inca) "
     "pagan sistemáticamente 1.1× a 8× más que Repaglas — consistente con declarar marca genuina John Deere en vez "
-    "de Maxiforce.</div>",
+    "de Maxiforce. <b>Nuevo en set-2026:</b> R & T Rockcat (ASSUR POWER) entra 25-40% más barato que "
+    "Repaglas en 8 de los 9 códigos que trajo — un lote de prueba (4-24 unidades), no un benchmark todavía, pero "
+    "es el mismo patrón de proveedor asiático que se veía con Dinámica.</div>",
     unsafe_allow_html=True,
 )
 

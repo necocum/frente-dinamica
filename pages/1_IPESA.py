@@ -1,9 +1,10 @@
 """IPESA — repuestos de motor: dónde está la oportunidad para Repaglas.
 
 Fuente: ADEX Data Trade (SUNAT / Aduanas del Perú). Histórico completo por RUC
-de IPESA S.A.C. (20101639275), ene.2022–ago.2026, 5 tramos anuales sin truncar
-(183,499 líneas) + agosto 2026 (5,027 líneas). Se excluyen máquinas y equipos completos con el
-perímetro común a las 3 empresas (ver sección "Crecimiento comparado"). Recalculado completo 2026-10-02.
+de IPESA S.A.C. (20101639275), ene.2022–set.2026, tramos anuales sin truncar (ene.2022–jul.2026)
++ agosto–setiembre 2026 (11,655 líneas, descarga 2026-11-06; reemplaza al agosto del 2026-10-02, que
+ADEX corrigió). Se excluyen máquinas y equipos completos con el perímetro común a las 3 empresas
+(ver sección "Crecimiento comparado"). Recalculado completo 2026-11-06.
 """
 
 import plotly.graph_objects as go
@@ -55,14 +56,14 @@ categorias = [
     "Cuchillas agrícolas (8208.40)",
     "Partes de transmisiones cardánicas (8708.99)",
 ]
-fob_categorias = [10324250, 7147334, 6233462, 5314415, 4854823, 2725170, 2686026, 2591735, 2540961, 2386223]
+fob_categorias = [10727164, 7315781, 6491271, 5634409, 5115199, 2803602, 2732646, 2680683, 2543276, 2477715]
 
 years = ["2022", "2023", "2024", "2025", "2026*"]
-filtros_fob = [4476250, 3956153, 5699546, 6470242, 5213346]
-filtros_fob_anualizado_2026 = 7820020
+filtros_fob = [4476250, 3956153, 5699546, 6470242, 6149843]
+filtros_fob_anualizado_2026 = 8199791
 
-marcas = [("John Deere", 129711, 68714863), ("Cummins", 1927, 3307802), ("Wirtgen", 2533, 3181966),
-          ("CAT", 29, 66965), ("Scania", 22, 69610), ("Volvo", 12, 15236), ("Case", 6, 9672)]
+marcas = [("John Deere", 133866, 70275268), ("Cummins", 2070, 3609081), ("Wirtgen", 2565, 3205007),
+          ("CAT", 29, 66965), ("Scania", 22, 69610), ("Volvo", 13, 17381), ("Case", 7, 12252)]
 
 codigos = [
     ["RE504836", "Filtro aceite/combustible motor", 75, 420762, True, "OPEX JD"],
@@ -133,16 +134,17 @@ st.markdown(
     "dónde está la oportunidad comercial para **:blue[Repaglas]**."
 )
 st.caption(
-    "Periodo: **enero 2022 – agosto 2026**, 5 tramos anuales descargados sin truncar + agosto 2026 · Fuente: **ADEX Data Trade** "
-    "sobre registros de SUNAT / Aduanas · Universo tras excluir máquinas y equipos completos: **182,160 líneas · US$119.8M FOB**"
+    "Periodo: **enero 2022 – setiembre 2026**, tramos anuales descargados sin truncar + agosto–setiembre 2026 · Fuente: "
+    "**ADEX Data Trade** sobre registros de SUNAT / Aduanas · Universo tras excluir máquinas y equipos completos: "
+    "**188,537 líneas · US$123.4M FOB**"
 )
 
 # ================= KPI ROW =================
 k1, k2, k3, k4 = st.columns(4)
-k1.metric("Repuestos IPESA 2022–ago.26", "US$119.8M", "excl. máquinas y equipos completos")
-k2.metric("Filtros de motor", "US$25.8M", "8421.23 + 8421.31 + 8421.99 + 8421.29")
-k3.metric("FOB repuestos con marca John Deere", "57.4%", "US$68.7M de US$119.8M")
-k4.metric("Crecimiento filtros 2022→2026e", "+75%", "US$4.48M → US$7.8M anualizado")
+k1.metric("Repuestos IPESA 2022–set.26", "US$123.4M", "excl. máquinas y equipos completos")
+k2.metric("Filtros de motor", "US$26.8M", "8421.23 + 8421.31 + 8421.99 + 8421.29")
+k3.metric("FOB repuestos con marca John Deere", "57.0%", "US$70.3M de US$123.4M")
+k4.metric("Crecimiento filtros 2022→2026e", "+83%", "US$4.48M → US$8.2M anualizado")
 
 st.divider()
 
@@ -151,32 +153,32 @@ st.divider()
 # 8430, 8474, 8502, 8704, 8705, 8716, 8427, 8426, 8408 motores completos, 8479.10 pavimentadoras/
 # fresadoras, 8428.33, 8432/8433/8436 salvo sus partidas de "partes", 9015/9023/9024/8526 instrumentos).
 # "Canasta Repaglas" = las 10 partidas de 4 dígitos que suman el 95.5% del FOB de Repaglas 2022–ago.2026:
-# 8409, 8413, 8483, 8484, 8708, 8487, 8481, 8421, 4016, 8482. Fuente: reportes ADEX por RUC + ago-2026
-# (descarga 2026-10-02). Calculado 2026-10-02.
-ventanas = ["sep22–ago23", "sep23–ago24", "sep24–ago25", "sep25–ago26"]
+# 8409, 8413, 8483, 8484, 8708, 8487, 8481, 8421, 4016, 8482. Fuente: reportes ADEX por RUC + ago–set 2026
+# (descarga 2026-11-06). Recalculado 2026-11-06 con ventanas oct–sep (antes sep–ago).
+ventanas = ["oct22–sep23", "oct23–sep24", "oct24–sep25", "oct25–sep26"]
 crec = {
     "Total repuestos (sin máquinas completas)": {
-        "Repaglas": [726207, 867192, 766770, 779503],
-        "Dinámica": [1601321, 1749396, 1964589, 1904967],
-        "IPESA": [19786008, 22646006, 26287216, 33927189],
+        "Repaglas": [760288, 887462, 800172, 765640],
+        "Dinámica": [1780089, 1689784, 2005246, 1837725],
+        "IPESA": [19350624, 22491727, 28399739, 33758516],
     },
     "Canasta Repaglas (mismas 10 partidas)": {
-        "Repaglas": [693497, 831067, 728099, 750564],
-        "Dinámica": [1360048, 1417293, 1651700, 1658557],
-        "IPESA": [10044816, 11823836, 13608783, 17951259],
+        "Repaglas": [726604, 846493, 761360, 740640],
+        "Dinámica": [1516246, 1376871, 1613224, 1669140],
+        "IPESA": [9794290, 11729941, 14340298, 18679310],
     },
     "Canasta Repaglas sin filtros": {
-        "Repaglas": [670351, 816221, 715233, 742270],
-        "Dinámica": [1280161, 1322660, 1573038, 1575889],
-        "IPESA": [6563593, 6271922, 7491276, 10330894],
+        "Repaglas": [702592, 830168, 747423, 733983],
+        "Dinámica": [1423289, 1286833, 1533871, 1588539],
+        "IPESA": [6527050, 6267178, 7904272, 10611002],
     },
     "Filtros de motor": {
-        "Repaglas": [23146, 14846, 12866, 8294],
-        "Dinámica": [79887, 94633, 78662, 82668],
-        "IPESA": [3481223, 5551914, 6117507, 7620365],
+        "Repaglas": [24012, 16325, 13937, 6657],
+        "Dinámica": [92957, 90038, 79353, 80601],
+        "IPESA": [3267240, 5462763, 6436026, 8068308],
     },
 }
-duas_12m = {"Repaglas": [20, 25, 21, 26], "Dinámica": [64, 61, 70, 75], "IPESA": [1099, 947, 1118, 1249]}
+duas_12m = {"Repaglas": [21, 26, 21, 27], "Dinámica": [68, 59, 73, 73], "IPESA": [1079, 960, 1148, 1263]}
 colores = {"Repaglas": REP, "Dinámica": "#eb6834", "IPESA": IPE}
 
 
@@ -200,7 +202,7 @@ def crec_chart(datos):
     fig.update_layout(
         height=360, margin=dict(l=10, r=120, t=10, b=10), hovermode="x unified",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-        yaxis=dict(title="Índice (sep22–ago23 = 100)", gridcolor="#e8e2d6"),
+        yaxis=dict(title="Índice (oct22–sep23 = 100)", gridcolor="#e8e2d6"),
         plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     )
     return fig
@@ -209,8 +211,8 @@ def crec_chart(datos):
 st.subheader("Crecimiento comparado: IPESA vs. Repaglas vs. Dinámica, últimos 12 meses")
 st.write(
     "Comparación **papas con papas**: las tres empresas medidas con el mismo perímetro (solo repuestos, sin "
-    "máquinas ni equipos completos), en los mismos periodos de **12 meses móviles cerrando en agosto** — que "
-    "neutralizan la distinta frecuencia de pedido de cada una — y en **índice (sep22–ago23 = 100)**, porque "
+    "máquinas ni equipos completos), en los mismos periodos de **12 meses móviles cerrando en setiembre** — que "
+    "neutralizan la distinta frecuencia de pedido de cada una — y en **índice (oct22–sep23 = 100)**, porque "
     "IPESA es ~40× más grande que Repaglas y en US$ no se vería a las tres en un mismo gráfico."
 )
 alcance = st.radio("Qué comparar", list(crec.keys()), index=1, horizontal=True, label_visibility="collapsed")
@@ -220,9 +222,9 @@ g1, g2 = st.columns([3, 2])
 with g1:
     st.plotly_chart(crec_chart(datos), use_container_width=True)
 with g2:
-    st.markdown("**Últimos 12 meses (sep25–ago26) vs. 12 meses anteriores**")
+    st.markdown("**Últimos 12 meses (oct25–sep26) vs. 12 meses anteriores**")
     for emp, vals in datos.items():
-        st.metric(emp, fmt_money(vals[3]), f"{(vals[3] / vals[2] - 1) * 100:+.1f}% vs. sep24–ago25")
+        st.metric(emp, fmt_money(vals[3]), f"{(vals[3] / vals[2] - 1) * 100:+.1f}% vs. oct24–sep25")
 
 st.dataframe(
     {
@@ -235,23 +237,25 @@ st.dataframe(
     hide_index=True,
 )
 st.markdown(
-    "<div class='callout-op'><b>Lectura — IPESA crece ~30% mientras Repaglas y Dinámica están planas.</b> En los "
-    "últimos 12 meses IPESA creció <b>+29%</b> en repuestos y <b>+32% en la misma canasta de partidas que trae "
-    "Repaglas</b> (Repaglas +3%, Dinámica 0%). No es solo filtros (+25%): sacando filtros, IPESA crece <b>+38%</b> "
-    "en el núcleo motor/transmisión, con 8409 partes de motor casi duplicándose (US$0.54M → US$1.05M). Ese "
-    "crecimiento <b>no viene de repuestos declarados John Deere</b> (planos: US$4.8M → US$4.9M en la canasta sin "
-    "filtros), sino de <b>Cummins</b> (US$0.2M → US$1.7M), <b>rodamientos NKS</b> y otras marcas, y repuestos del "
-    "grupo Wirtgen. IPESA está ensanchando catálogo dentro de las mismas partidas arancelarias de Repaglas, pero "
-    "hacia marcas donde Repaglas no está.</div>",
+    "<div class='callout-op'><b>Lectura — IPESA crece ~30% en las partidas de Repaglas mientras Repaglas baja y "
+    "Dinámica está casi plana.</b> En los últimos 12 meses (oct25–sep26) IPESA creció <b>+19%</b> en repuestos y "
+    "<b>+30% en la misma canasta de partidas que trae Repaglas</b> (Repaglas −2.7%, Dinámica +3.5%). No es solo "
+    "filtros (+25%): sacando filtros, IPESA crece <b>+34%</b> en el núcleo motor/transmisión, con 8409 partes de "
+    "motor duplicándose (US$0.50M → US$1.08M). Ese crecimiento <b>no viene de repuestos declarados John Deere</b> "
+    "(planos: US$5.06M → US$5.10M en la canasta sin filtros), sino de <b>Cummins</b> (US$0.29M → US$1.79M), "
+    "repuestos del grupo Wirtgen (US$0.32M → US$0.74M) y otras marcas. IPESA está ensanchando catálogo dentro de "
+    "las mismas partidas arancelarias de Repaglas, pero hacia marcas donde Repaglas no está. (Con la ventana "
+    "sep–ago el total daba +29%; el +19% actual es menor porque el año anterior incluye octubre 2024, un mes "
+    "muy alto de IPESA.)</div>",
     unsafe_allow_html=True,
 )
 st.caption(
     "Perímetro común: se excluyen máquinas y equipos completos (tractores, maquinaria vial, pavimentadoras/fresadoras "
     "8479.10, cisternas 8716, motores completos 8408, implementos agrícolas completos, instrumentos) — el mismo que "
     "usa toda esta hoja. "
-    "Ojo con Dinámica: −3.0% en total repuestos pero +0.4% en la canasta Repaglas — toda su caída está fuera de "
-    "las partidas de Repaglas (−21%: dejó de traer aceites lubricantes, menos partes de cosecha y arandelas); en lo "
-    "que compite con Repaglas está plana."
+    "Ojo con Dinámica: −8.4% en total repuestos pero +3.5% en la canasta Repaglas — toda su caída está fuera de "
+    "las partidas de Repaglas (US$392K → US$169K, −57%); en lo que compite con Repaglas está estable o sube "
+    "levemente."
 )
 
 st.divider()
@@ -266,8 +270,10 @@ st.write(
 )
 
 anios_codigo = ["2022", "2023", "2024", "2025", "2026"]
-ipesa_pct_codigo = [86.6, 87.3, 19.7, 9.1, 3.4]
-repaglas_pct_codigo = [84.0, 83.9, 78.3, 84.5, 83.7]
+# 2026 ajustado el 2026-11-06 sumando setiembre (IPESA: ~32 de 4,223 líneas JD con código; Repaglas: 5 de 7)
+# sobre la base ene–ago; el patrón exacto de 2022–2025 no se volvió a correr.
+ipesa_pct_codigo = [86.6, 87.3, 19.7, 9.1, 3.0]
+repaglas_pct_codigo = [84.0, 83.9, 78.3, 84.5, 83.3]
 
 cc1, cc2 = st.columns([3, 2])
 with cc1:
@@ -278,13 +284,13 @@ with cc1:
     st.caption(
         "% de líneas de importación que mencionan \"John Deere\" y además traen un código de parte identificable "
         "(patrón alfanumérico tipo RE12345, R123456, DZ111138, etc.) en alguno de los 5 campos de Descripción "
-        "Comercial, por año, 2022–ago.2026 (2026 parcial, solo hasta agosto; en agosto 2026 IPESA no declaró "
-        "código en ninguna de sus 3,244 líneas John Deere)."
+        "Comercial, por año, 2022–set.2026 (2026 parcial, solo hasta setiembre; en agosto 2026 IPESA no declaró "
+        "código en ninguna de sus líneas John Deere, y en setiembre en menos de 1%)."
     )
 with cc2:
     st.metric("IPESA con código, 2022", "86.6%")
-    st.metric("IPESA con código, 2026", "3.4%", "-83.2 pp", delta_color="inverse")
-    st.metric("Repaglas con código, 2022→2026", "84.0% → 83.7%", "sin caída")
+    st.metric("IPESA con código, 2026", "3.0%", "-83.6 pp", delta_color="inverse")
+    st.metric("Repaglas con código, 2022→2026", "84.0% → 83.3%", "sin caída")
 
 st.markdown(
     "<div class='callout'><b>No es un cambio de formato de ADEX — es un comportamiento específico de IPESA.</b> "
@@ -313,16 +319,16 @@ st.divider()
 # ================= SECCIÓN 1: JOHN DEERE =================
 st.subheader("El hallazgo de fondo: IPESA es, ante todo, un importador de repuestos John Deere")
 st.write(
-    "**71.2%** de las líneas de repuesto de IPESA (129,711 de 182,160) mencionan \"John Deere\" en la descripción "
-    "comercial, concentrando **57.4% del FOB** (US$68.7M de US$119.8M). El resto del mercado que atiende es "
-    "residual: Cummins (motores/generadores, US$3.3M), repuestos de maquinaria vial Wirtgen (US$3.2M), y menciones marginales de CAT, Scania, Volvo y Case."
+    "**71.0%** de las líneas de repuesto de IPESA (133,866 de 188,537) mencionan \"John Deere\" en la descripción "
+    "comercial, concentrando **57.0% del FOB** (US$70.3M de US$123.4M). El resto del mercado que atiende es "
+    "residual: Cummins (motores/generadores, US$3.6M), repuestos de maquinaria vial Wirtgen (US$3.2M), y menciones marginales de CAT, Scania, Volvo y Case."
 )
 st.markdown(
     "<div class='callout-op'><b>Esto cambia el marco de la comparación.</b> IPESA no es un competidor "
     "\"adyacente\" que de vez en cuando toca tu terreno — es, en volumen, el mayor importador de repuestos John "
     "Deere del Perú, en el mismo segmento de marca donde Repaglas construyó su liderazgo con Maxiforce (74–100% "
-    "de share en los 10 SKU ancla ya verificados). La escala de IPESA en repuestos JD (US$68.7M) es ~19× el FOB "
-    "total histórico de Repaglas (US$3.6M) en el mismo periodo.</div>",
+    "de share en los 10 SKU ancla ya verificados). La escala de IPESA en repuestos JD (US$70.3M) es ~19× el FOB "
+    "total histórico de Repaglas (US$3.7M) en el mismo periodo.</div>",
     unsafe_allow_html=True,
 )
 
@@ -333,8 +339,8 @@ st.subheader("Qué tipo de repuesto trae más")
 st.markdown("#### Filtración de motor es, por lejos, la categoría más grande")
 st.write(
     "Ordenando las partidas arancelarias de repuesto (excluyendo aceites/lubricantes, que son un consumible, no "
-    "una pieza) por valor FOB acumulado 2022–ago.2026, las tres primeras posiciones son las tres familias de "
-    "filtro de motor — juntas suman **US$23.7M**, más del doble que la siguiente categoría."
+    "una pieza) por valor FOB acumulado 2022–set.2026, las tres primeras posiciones son las tres familias de "
+    "filtro de motor — juntas suman **US$24.5M**, más del doble que la siguiente categoría."
 )
 st.plotly_chart(hbar_single(categorias, fob_categorias, IPE), use_container_width=True)
 st.caption(
@@ -348,8 +354,8 @@ st.divider()
 st.subheader("Filtros de motor: una categoría en crecimiento sostenido")
 st.write(
     "El FOB de filtros de motor que importa IPESA no es plano — creció de US$4.0M (2023, su año más bajo) a "
-    "US$6.5M (2025), y 2026 va camino a superarlo con holgura (US$5.2M en ene–ago, ≈US$7.8M anualizado; solo agosto "
-    "2026 sumó US$1.17M, su mes más alto del año). No es una "
+    "US$6.5M (2025), y 2026 va camino a superarlo con holgura (US$6.1M en ene–set, ≈US$8.2M anualizado; agosto "
+    "2026 sumó US$1.17M, su mes más alto del año, y setiembre US$0.94M). No es una "
     "categoría de nicho ni en declive: es la línea de repuesto de mayor y más consistente crecimiento en todo el "
     "catálogo de IPESA."
 )
@@ -404,7 +410,7 @@ st.divider()
 st.subheader("Dónde está la oportunidad para Repaglas")
 st.markdown(
     """
-1. **Filtración de motor es la brecha más grande y más clara de todo el catálogo de IPESA** — US$25.8M en 4.7
+1. **Filtración de motor es la brecha más grande y más clara de todo el catálogo de IPESA** — US$26.8M en 4.75
    años, creciendo, y 100% fuera del alcance actual de Repaglas (Maxiforce no fabrica filtros; OPEX JD/Vapormatic
    los tienen pero casi no se venden).
 2. **El primer movimiento no requiere buscar proveedor nuevo.** RE504836, RE541922, RE522868 y KV16429 ya están
@@ -425,7 +431,8 @@ c1, c2 = st.columns(2)
 with c1:
     st.markdown(
         "**Metodología.** 5 exports ADEX Data Trade por RUC de IPESA (2022, 2023, 2024, 2025, 2026 por separado "
-        "para evitar el límite de 80,000 filas), 183,499 líneas, + agosto 2026 (5,027 líneas). Se excluyen máquinas "
+        "para evitar el límite de 80,000 filas) hasta julio 2026, + agosto–setiembre 2026 (11,655 líneas, descarga "
+        "6-nov-2026). Se excluyen máquinas "
         "y equipos completos por partida arancelaria (tractores 87.01, maquinaria vial 84.29/84.30/84.26/84.27, "
         "pavimentadoras/fresadoras 84.79.10, fajas sobre oruga 84.28.33, implementos agrícolas completos "
         "84.32/84.33/84.36 salvo sus partidas de partes, trituradoras 84.74, motores completos 84.08, gensets 85.02, "
